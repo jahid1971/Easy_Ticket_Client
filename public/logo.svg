@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="40" viewBox="0 0 160 40" fill="none" role="img" aria-labelledby="logoTitle logoDesc">
+  <title id="logoTitle">EasyTicket</title>
+  <desc id="logoDesc">EasyTicket logo — green ticket icon with text</desc>
+  <rect width="160" height="40" rx="8" fill="none" />
+  <g transform="translate(8,6)">
+    <!-- ticket shape -->
+    <path d="M0 4c0-2.21 1.79-4 4-4h20c2.21 0 4 1.79 4 4v24c0 2.21-1.79 4-4 4H4c-2.21 0-4-1.79-4-4V4z" fill="#0eac53" />
+    <!-- notch cutouts -->
+    <circle cx="6" cy="8" r="2" fill="#e6f5ed" />
+    <circle cx="22" cy="28" r="2" fill="#e6f5ed" />
+    <!-- stylized 'ET' negative space -->
+    <path d="M6 10h10v2H6v6h-2v-8a2 2 0 0 1 2-2z" fill="#ffffff" opacity="0.95" />
+    <path d="M12 14h6v2h-4v4h-2v-6z" fill="#ffffff" opacity="0.95" />
+  </g>
+  <g transform="translate(56,10)">
+    <text x="0" y="14" font-family="Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial" font-size="16" font-weight="700" fill="#0eac53">EasyTicket</text>
+  </g>
+</svg>
