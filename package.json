@@ -6,16 +6,24 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "load-index": "node scripts/load-index.js"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-popover": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@tanstack/react-query": "^5.85.5",
+    "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.1.0",
     "lucide-react": "^0.541.0",
     "next": "15.5.0",
     "react": "19.1.0",
+    "react-day-picker": "^9.9.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.62.0",
     "tailwind-merge": "^3.3.1"
@@ -23,6 +31,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@tanstack/eslint-plugin-query": "^5.83.1",
+    "@tanstack/react-query-devtools": "^5.85.5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

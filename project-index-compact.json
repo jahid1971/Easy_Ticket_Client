@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2025-08-25T00:00:00Z",
+  "summary": "Compact per-file index for EasyTicket client (paths + short summaries, ~1-2 lines each). Includes SportStock & Netra API-focused entries and TanStack mapping guidance.",
+  "files": {
+    "src/app/layout.tsx": "Main app layout for Next.js App Router; includes global providers and site chrome.",
+    "src/app/page.tsx": "Homepage entry; composes Hero section and landing content.",
+    "src/components/home/HeroSearch.tsx": "Hero search component with Tabs for bus/ship/hotel and a `SearchForm` form; responsive background image.",
+    "src/components/home/Steps.tsx": "UI that displays multi-step highlights/benefits on the landing page.",
+    "src/components/forms/SearchForm.tsx": "Search form used by HeroSearch; handles mode prop (bus/ship/hotel) and form submission.",
+    "src/components/ui/Logo.tsx": "SVG EasyTicket bus wordmark component with `Logo` and `EasyTicketLogoPreview`; supports variants and sizes.",
+    "src/components/ui/Navbar.tsx": "Top navigation component; likely contains branding and navigation links.",
+    "src/components/ui/button.tsx": "Reusable Button wrapper around shadcn/react primitives or Tailwind-styled button.",
+    "src/components/ui/input.tsx": "Form input control component used across forms.",
+    "src/components/ui/C_Input.tsx": "Custom input variant (controlled) with label handling.",
+    "src/components/ui/DatePicker.tsx": "Date picker using `react-day-picker` integrated into the UI components.",
+    "src/components/ui/LocationCombobox.tsx": "Location picker combobox used for origin/destination inputs.",
+    "src/components/ui/CustomDropdown.tsx": "Generic dropdown wrapper component used for compact selects.",
+    "src/lib/utils.ts": "Helper utilities used across the client (formatters, small helpers).",
+  "src/services/authService.ts": "Client auth service that calls backend `/auth/login` and `/auth/register` using the shared axios `apiClient`.",
+  "src/app/login/page.tsx": "Client login page using react-hook-form; posts credentials to auth service and redirects on success.",
+  "src/app/register/page.tsx": "Client registration page using react-hook-form; collects user details and posts to auth service.",
+
+    "reference/Netra_Health_Care_Client/src/helpers/axios/axiosInstance.ts": "Axios instance configured with interceptors for auth and token refresh; central HTTP client.",
+    "reference/Netra_Health_Care_Client/src/helpers/axios/axiosBaseQuery.ts": "Axios baseQuery adapter used by RTK `baseApi` — wraps `axiosInstance` and normalizes responses/errors.",
+    "reference/Netra_Health_Care_Client/src/redux/api/baseApi.ts": "RTK `baseApi` that uses `axiosBaseQuery` to centralize base URL and headers.",
+    "reference/Netra_Health_Care_Client/src/utils/apiBuilders.ts": "Utility `createApiBuilder` used across Netra APIs to declare endpoints with consistent patterns and tag usage.",
+    "reference/Netra_Health_Care_Client/src/redux/api/*.ts": "Multiple API files (authApi, doctorsApi, appointmentApi...) that use `createApiBuilder` and demonstrate consistent endpoint definitions and tag-based cache invalidation.",
+
+    "server/Easy_Ticket_Server/prisma/schema.prisma": "Prisma schema for server-side data models; canonical API contract reference.",
+    "README.md": "Project README with high-level instructions and notes.",
+    "FRONTEND_REQUIREMENTS.md": "Frontend requirements and planning doc present at repo root.",
+    "project-index.json": "Full project tree snapshot (shallow) saved earlier.",
+    "project-index-compact.json": "This compact index file; contains per-file short summaries for quick lookup.",
+    "project-index-README.md": "Documentation explaining how to reuse the project index snapshot.",
+    "public/Hero_background_image.png": "Hero background image asset used by landing HeroSearch component.",
+
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/utls/api.ts": "API builder helpers (endpoint builders) used to construct RTK Query endpoints; handles create, update, query, singleQuery, delete patterns.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/redux/api/baseApi.ts": "RTK Query `baseApi` (common base) used to define endpoints; used by `productApi`, `stockApi`, `userApi`, `adminApi`, `authApi`.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/redux/api/stockApi.ts": "Stock-related endpoints (getAllStocks, getBranchStocks, adjustStock, transfer); used heavily by stock management pages.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/redux/api/productApi.ts": "Product endpoints (getProducts, getSingleProduct, createProduct, updateProduct); used by product pages and variant creation.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/redux/api/userApi.ts": "User endpoints (getAllUsers, getUserById, create/update user roles); used by user management pages.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/redux/api/adminApi.ts": "Admin endpoints (getAllBranches, admin-specific admin-level data); referenced across admin pages.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/redux/api/authApi.ts": "Auth endpoints (getMe, login/logout, refresh) used by ProtectedRoutes and auth flows.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/redux/Store.ts": "Redux store wiring that adds `baseApi.reducerPath` and `baseApi.middleware` to the store; important for RTK Query integration.",
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/src/pages/*": "Multiple pages import hooks like `useGetProductsQuery`, `useGetAllUsersQuery`, `useGetAllBranchesQuery` — good examples of consuming RTK Query hooks in components.",
+
+    "reference/SPORTSTOCK_inventory_managemen/SportStock_client/tanstack_guidance.md": "Guidance (generated) mapping RTK Query patterns from SportStock to TanStack Query equivalents (see top-level `tanstackMapping` below)."
+  },
+
+  "tanstackMapping": {
+    "patternSummary": "How to translate RTK Query endpoints/hooks to TanStack Query (useQuery/useMutation + queryClient)",
+    "examples": {
+      "query": {
+        "rtk": "useGetProductsQuery(params)",
+        "tanstack": "useQuery(['products', params], () => api.get('/products', { params }).then(r => r.data))"
+      },
+      "singleQuery": {
+        "rtk": "useGetuserByIdQuery(userId)",
+        "tanstack": "useQuery(['user', userId], () => api.get(`/users/${userId}`).then(r => r.data), { enabled: !!userId })"
+      },
+      "mutation": {
+        "rtk": "useCreateProductMutation()",
+        "tanstack": "useMutation((payload) => api.post('/products', payload).then(r => r.data), { onSuccess: () => queryClient.invalidateQueries(['products']) })"
+      },
+      "cacheInvalidation": "RTK Query uses tags; replicate with `queryClient.invalidateQueries(['products'])` or more specific keys after mutations in TanStack.",
+      "baseApi": "RTK `baseApi` centralizes fetch and headers; replicate with a shared `api` client (axios/fetch wrapper) and reuse it in TanStack fetchers. Keep auth refresh logic in the client or use interceptors."
+    }
+  },
+
+  "netraTanstackGuidance": {
+    "overview": "Netra uses an axiosInstance + axiosBaseQuery + createApiBuilder to keep endpoints consistent and handle auth; replicate with a shared Axios client + TanStack fetchers and a set of small reusable fetch/mutation hooks.",
+    "sampleApiClient": "Create `src/lib/apiClient.ts` that exports an axios instance with interceptors for Authorization and refresh handling (copy axiosInstance pattern).",
+    "sampleTanstackHooks": {
+      "useProducts": "useQuery(['products', params], () => apiClient.get('/products', { params }).then(r => r.data))",
+      "useCreateProduct": "useMutation((payload) => apiClient.post('/products', payload).then(r => r.data), { onSuccess: () => queryClient.invalidateQueries(['products']) })",
+      "helperPattern": "Create small factory helpers `makeQueryKey('products')` and `makeFetcher(path)` to keep hooks consistent and DRY, similar to `createApiBuilder`."
+    }
+  }
+}

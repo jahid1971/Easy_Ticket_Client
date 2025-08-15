@@ -13,12 +13,12 @@ const items = [
     },
     {
         title: "Pay",
-        desc: "Complete your booking securely using cards, mobile banking, or other options.",
+        desc: "Complete your booking securely using card, mobile banking, or other options.",
         icon: CreditCard,
     },
 ];
 
-export function Steps() {
+ function Steps() {
     return (
         <section className="container mx-auto px-4 py-12">
             <h2 className="text-center text-2xl font-semibold">

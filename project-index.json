@@ -1,0 +1,162 @@
+{
+  "root": {
+    "files": [
+      ".github/",
+      ".gitignore",
+      ".next/",
+      "components.json",
+      "eslint.config.mjs",
+      "FRONTEND_REQUIREMENTS.md",
+      "next-env.d.ts",
+      "next.config.ts",
+      "node_modules/",
+      "package-lock.json",
+      "package.json",
+      "postcss.config.mjs",
+      "public/",
+      "README.md",
+      "reference/",
+      "server/",
+      "src/",
+      "tsconfig.json",
+      "tsconfig.tsbuildinfo"
+    ]
+  },
+  "public": [
+    "file.svg",
+    "globe.svg",
+    "Hero_background_image.png",
+    "next.svg",
+    "vercel.svg",
+    "window.svg"
+  ],
+  "reference": {
+    "Netra_Health_Care_Client": {
+      "files": [
+        "next.config.js",
+        "package.json",
+        "postcss.config.js",
+        "README.md",
+        "tsconfig.json"
+      ],
+      "public": [
+        "logo.png",
+        "next.svg",
+        "vercel.svg"
+      ],
+      "src": {
+        "middleware.ts": "file",
+        "app": {
+          "globals.css": "file",
+          "layout.tsx": "file",
+          "not-found.tsx": "file",
+          "withCommonLayout/": "dir",
+          "withDashboardLayout/": "dir",
+          "login/": "dir",
+          "register/": "dir",
+          "video/": "dir"
+        },
+        "assets": "dir",
+        "components": "dir",
+        "constants": "dir",
+        "helpers": {
+          "axios": [
+            "axiosBaseQuery.ts",
+            "axiosInstance.ts"
+          ]
+        },
+        "hooks": [
+          "useUserInfo.ts"
+        ],
+        "lib": "dir",
+        "redux": "dir",
+        "services": "dir",
+        "types": "dir",
+        "utils": "dir"
+      }
+    },
+    "SPORTSTOCK_inventory_managemen": {
+      "SportStock_client": {
+        "files": [
+          "components.json",
+          "index.html",
+          "package.json",
+          "postcss.config.js",
+          "README.md",
+          "tailwind.config.js",
+          "tsconfig.json",
+          "tsconfig.node.json",
+          "vercel.json",
+          "vite.config.ts"
+        ],
+        "src": "dir"
+      }
+    }
+  },
+  "server": {
+    "Easy_Ticket_Server": {
+      "files": [
+        "BACKEND_REQUIREMENTS.md",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "docs": [
+        "bus-seatmap.md",
+        "swagger.yaml",
+        "examples/"
+      ],
+      "prisma": [
+        "schema.prisma",
+        "migrations/"
+      ],
+      "src": [
+        "app/",
+        "app.ts",
+        "prisma.ts",
+        "server.ts"
+      ]
+    }
+  },
+  "src": {
+    "app": [
+      "favicon.ico",
+      "globals.css",
+  "layout.tsx",
+  "page.tsx",
+  "login/",
+  "register/"
+    ],
+    "components": {
+      "forms": [
+        "SearchForm.tsx"
+      ],
+      "home": [
+        "HeroSearch.tsx",
+        "Steps.tsx"
+      ],
+      "ui": [
+        "button.tsx",
+        "calendar.tsx",
+        "command.tsx",
+        "CustomDropdown.tsx",
+        "C_Input.tsx",
+        "DatePicker.tsx",
+        "dialog.tsx",
+        "input.tsx",
+        "label.tsx",
+        "LocationCombobox.tsx",
+        "Logo.tsx",
+        "Navbar.tsx",
+        "popover.tsx",
+        "tabs.tsx"
+      ]
+    },
+    "lib": [
+      "utils.ts"
+    ],
+    "services": [
+      "routeService.ts",
+      "authService.ts"
+    ]
+  }
+}

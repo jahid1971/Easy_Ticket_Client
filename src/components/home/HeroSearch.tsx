@@ -3,35 +3,19 @@ import { useState } from "react";
 import Image from "next/image";
 import { Ship, Hotel, Bus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { C_Input } from "@/components/ui/C_Input";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
+import { SearchForm } from "@/components/forms/SearchForm";
 
-type Mode = "bus" | "ship" | "hotel";
-
-const trending = [
-    "Dhaka",
-    "Rajshahi",
-    "Chattogram",
-    "Cox's Bazar",
-    "Rangamati",
-    "Sylhet",
-];
-
-export function HeroSearch() {
+function HeroSearch() {
     const [mode, setMode] = useState<Mode>("bus");
+    const trending = [
+        "Dhaka to Cox's Bazar",
+        "Dhaka to Sylhet",
+        "Chattogram to Rangamati",
+    ];
 
     return (
-        <section className="relative isolate overflow-hidden py-8 sm:py-12 lg:py-20">
-            {/* Normal image for small/medium screens */}
-            <Image
-                src="/Hero_background_image.png"
-                alt="cover"
-                width={1920}
-                height={1080}
-                className="object-cover filter block lg:hidden w-full"
-            />
-
+        <section className="relative py-10 lg:py-20">
             {/* Background image + overlays for large screens */}
             <div className="absolute inset-0 -z-10 hidden lg:block">
                 <Image
@@ -52,19 +36,28 @@ export function HeroSearch() {
                     >
                         <div className="flex justify-center">
                             <TabsList className="absolute left-1/2 -translate-1/2 lg:static lg:left-0 lg:-translate-0  w-fit bg-transparent lg:bg-white/60   rounded-b-none px-2 py-1  ">
-                                <TabsTrigger value="bus" className="px-4 bg-background lg:bg-transparent ">
+                                <TabsTrigger
+                                    value="bus"
+                                    className="px-4 bg-background lg:bg-transparent "
+                                >
                                     <span className="inline-flex items-center gap-2">
                                         <Bus className="size-4" />
                                         Bus
                                     </span>
                                 </TabsTrigger>
-                                <TabsTrigger value="ship" className="px-4 bg-background lg:bg-transparent mx-2">
+                                <TabsTrigger
+                                    value="ship"
+                                    className="px-4 bg-background lg:bg-transparent mx-2"
+                                >
                                     <span className="inline-flex items-center gap-2">
                                         <Ship className="size-4" />
                                         Ship
                                     </span>
                                 </TabsTrigger>
-                                <TabsTrigger value="hotel" className="px-4  bg-background lg:bg-transparent">
+                                <TabsTrigger
+                                    value="hotel"
+                                    className="px-4  bg-background lg:bg-transparent"
+                                >
                                     <span className="inline-flex items-center gap-2">
                                         <Hotel className="size-4" />
                                         Hotel
@@ -121,62 +114,6 @@ export function HeroSearch() {
     );
 }
 
-type SearchFormValues = {
-    from: string;
-    to: string;
-    journeyDate: string;
-    returnDate?: string;
-};
+type Mode = "bus" | "ship" | "hotel";
 
-function SearchForm({ mode, disabled }: { mode: Mode; disabled?: boolean }) {
-    const {
-        control,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<SearchFormValues>();
-    const onSubmit = (data: SearchFormValues) => {
-        // TODO: hook into router/search
-    };
-
-    return (
-        <form id="hero-search-form" onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <C_Input
-                    id="from"
-                    label="Going From"
-                    placeholder="City or terminal"
-                    control={control}
-                    error={errors.from?.message}
-                    disabled={disabled}
-                    required
-                />
-                <C_Input
-                    id="to"
-                    label="Going To"
-                    placeholder="City or terminal"
-                    control={control}
-                    error={errors.to?.message}
-                    disabled={disabled}
-                    required
-                />
-                <C_Input
-                    id="journeyDate"
-                    label="Journey Date"
-                    type="date"
-                    control={control}
-                    error={errors.journeyDate?.message}
-                    disabled={disabled}
-                    required
-                />
-                {/* <C_Input
-                    id="returnDate"
-                    label="Return Date"
-                    type="date"
-                    control={control}
-                    error={errors.returnDate?.message}
-                    disabled={disabled}
-                /> */}
-            </div>
-        </form>
-    );
-}
+export default HeroSearch;
