@@ -3,14 +3,16 @@ import { baseUrl } from "@/constants/common";
 
 import { TResponse } from "@/types/general.types";
 
+import { deleteCookies, getCookie, setCookie } from "@/utils/cookies";
+
 import axios, { AxiosResponse } from "axios";
 
-const instance = axios.create();
+const instance = axios.create({ baseURL: baseUrl });
 instance.defaults.headers.post["Content-Type"] = "application/json";
 instance.defaults.headers["Accept"] = "application/json";
 instance.defaults.timeout = 60000;
 
-type TAxiosResponse<T> = AxiosResponse<T> & TResponse<T>;
+// Note: Response interceptor returns the JSON body so callers always get parsed data
 
 instance.interceptors.request.use(
     function (config) {
@@ -28,10 +30,9 @@ instance.interceptors.request.use(
 );
 
 instance.interceptors.response.use(
-    function (response): TAxiosResponse<unknown> {
-        console.log(response?.data, "response in axios instance");
-
-        return response;
+    function (response): unknown {
+        // Always return the JSON body so callers don't have to access `.data`
+        return response.data;
     },
 
     async function (error) {
@@ -48,14 +49,9 @@ instance.interceptors.response.use(
 
                 if (accessToken) {
                     try {
+                        // This call goes through interceptors and will return the JSON body
                         const res = await instance(originalRequest);
-
-                        const resObject = {
-                            data: res?.data,
-                            meta: res?.data?.meta,
-                        };
-
-                        return resObject;
+                        return res;
                     } catch (retryError) {
                         console.log("retryError", retryError);
 
@@ -89,33 +85,8 @@ export { instance };
 //==============================================================================================================
 // --------------------------utils for client-side token management --------------------------
 
-function getCookie(name: string) {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith(name + "=")) {
-            return cookie.substring(name.length + 1);
-        }
-    }
-    return null;
-}
-
-// Browser-only: set cookie (non-HttpOnly) so axios can read it
-function setCookie(name: string, value: string, days = 1) {
-    const date = new Date();
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-    const expires = `expires=${date.toUTCString()}`;
-    document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax`;
-}
-
-// Browser-only: delete a list of cookies by expiring them
-function deleteCookies(keys: string[]) {
-    keys.forEach((key) => {
-        document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
-    });
-}
-
 // Client-side token refresh using refreshToken cookie
+
 export async function refreshAccessToken(): Promise<string | null> {
     try {
         const res = await fetch(`${baseUrl}/auth/refresh-token`, {
@@ -134,7 +105,7 @@ export async function refreshAccessToken(): Promise<string | null> {
         type RefreshResponse =
             | { data?: { accessToken?: string } }
             | { accessToken?: string };
-            
+
         const json = (await res.json()) as RefreshResponse;
         const newAccessToken: string | undefined =
             (json as { data?: { accessToken?: string } })?.data?.accessToken ??

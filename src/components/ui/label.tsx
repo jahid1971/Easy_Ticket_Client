@@ -1,23 +1,24 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
+"use client"
 
-type LabelProps = React.LabelHTMLAttributes<HTMLLabelElement> & {
-    requiredMark?: boolean;
-};
+import * as React from "react"
+import * as LabelPrimitive from "@radix-ui/react-label"
 
-export function Label({ className, requiredMark, children, ...props }: LabelProps) {
-    return (
-        <label
-            className={cn(
-                "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-                className
-            )}
-            {...props}
-        >
-            {children}
-            {requiredMark ? <span className="ml-0.5 text-destructive">*</span> : null}
-        </label>
-    );
+import { cn } from "@/lib/utils"
+
+function Label({
+  className,
+  ...props
+}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+  return (
+    <LabelPrimitive.Root
+      data-slot="label"
+      className={cn(
+        "flex items-center gap-2 text-sm leading-none font-medium select-none group-data-[disabled=true]:pointer-events-none group-data-[disabled=true]:opacity-50 peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-export type { LabelProps };
+export { Label }

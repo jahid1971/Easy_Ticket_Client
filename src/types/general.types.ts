@@ -1,14 +1,8 @@
-export interface IMeta {
-    page: number;
-    limit: number;
-    total: number;
-}
-
 export type TResponse<T> = {
     statuscode?: number;
     data: T;
     error?: any;
-    meta?: IMeta;
+    meta?: TMeta;
     success?: boolean;
     message?: string;
 };
@@ -21,3 +15,17 @@ export type TQuery<T = Record<string, unknown>> = {
     limit?: number;
     [key: string]: any;
 } & Partial<T>;
+
+export type TApiResponse<U> = {
+    success?: boolean;
+    statusCode?: number;
+    message?: string;
+    data: U;
+    meta?: TMeta;
+};
+export type TMeta = {
+    limit: number;
+    page: number;
+    total: number;
+    totalPage: number;
+};

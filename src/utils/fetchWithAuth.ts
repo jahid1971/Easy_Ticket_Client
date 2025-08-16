@@ -1,11 +1,11 @@
-import { authKey, refreshKey } from "@/constants/authKey";
-import { baseUrl } from "@/constants/commmon";
+import { authKey } from "@/constants/authKey";
+import { baseUrl } from "@/constants/common";
 import { handleUnAuthenticated } from "@/services/actions/cookies";
 import { refreshAccessToken } from "@/services/actions/refreshAccessToken";
 import { cookies } from "next/headers";
 
 interface FetchOptions extends RequestInit {
-    data?: any;
+    data?: unknown;
 }
 
 export async function fetchWithAuth(
@@ -59,11 +59,11 @@ export async function fetchWithAuth(
         data.statusCode = statusCode;
 
         return data;
-    } catch (err: any) {
+    } catch (err) {
         console.log(err, "error in fetchWithAuth carech block");
         return {
             error: err,
-            message: err?.message || "Fetch error in fetchWithAuth",
+            message: (err as Error)?.message || "Fetch error in fetchWithAuth",
         };
     }
 }

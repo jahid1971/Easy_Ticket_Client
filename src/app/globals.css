@@ -63,14 +63,15 @@
   --primary: #0eac53;
   --primary-foreground: #ffffff;
   --primary-bg: #e6f5ed;
- 
+
   --primary-deep: #049d49;
   --primary-deep-foreground: #ffffff;
   /* Brand accent (custom) - keep separate from shadcn accent */
   --secondary: #ff8922;
   --secondary-foreground: #ffffff;
   /* Use shadcn default accent for system components */
-  --accent: oklch(0.97 0 0);
+  /* --accent: oklch(0.97 0 0); */
+  --accent: #e6f5ed;
   --accent-foreground: oklch(0.205 0 0);
   --warning: #f88922;
   --warning-foreground: #ffffff;

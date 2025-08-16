@@ -1,3 +1,4 @@
+import { TApiResponse } from "@/types/general.types";
 import apiClient from "./apiClient";
 import {
     useQuery,
@@ -7,8 +8,6 @@ import {
     UseMutationOptions,
     QueryClient,
 } from "@tanstack/react-query";
-import makeQueryKey from "./tanstackHelpers";
-
 
 export type BuildPath<TId = string> = (
     base: string,
@@ -24,64 +23,68 @@ export type CreateRQApiConfig<TId = string> = {
     defaultRetry?: number | false;
 };
 
-export function createResourceApi<T, TCreate = Partial<T>, TUpdate = Partial<T>, TId = string>(
-    config: CreateRQApiConfig<TId>
-) {
-    const { key, url, buildPath, defaultStaleTime = 60_000, defaultRetry = 1 } = config;
+const makeQueryKey = (key: string, params?: unknown) => {
+    return params !== undefined ? [key, params] : [key];
+};
 
-    const path: BuildPath<TId> = buildPath ?? ((base, id?: TId, id2?: TId) => {
-        if (id && id2) return `${base}/${String(id)}/${String(id2)}`;
-        if (id) return `${base}/${String(id)}`;
-        return base;
-    });
+export function createResourceApi<
+    T,
+    TCreate = Partial<T>,
+    TUpdate = Partial<T>,
+    TId = string
+>(config: CreateRQApiConfig<TId>) {
+    const {
+        key,
+        url,
+        buildPath,
+        defaultStaleTime = 60_000,
+        defaultRetry = 1,
+    } = config;
+
+    const path: BuildPath<TId> =
+        buildPath ??
+        ((base, id?: TId, id2?: TId) => {
+            if (id && id2) return `${base}/${String(id)}/${String(id2)}`;
+            if (id) return `${base}/${String(id)}`;
+            return base;
+        });
 
     // Plain fetchers (conventional CRUD names)
-    const getAll = async (params?: Record<string, unknown>): Promise<T[]> => {
-        const res = await apiClient.get<T[]>(url, { params });
-        return res.data as T[];
+    const getAll = async (params?: Record<string, unknown>) => {
+        const res = await apiClient.get<TApiResponse<T[]>>(url, { params });
+        return res as unknown as TApiResponse<T[]>;
     };
 
-    const getById = async (id?: TId, id2?: TId): Promise<T> => {
+    const getById = async (id?: TId, id2?: TId) => {
         const p = path(url, id, id2);
-        const res = await apiClient.get<T>(p);
-        return res.data as T;
+        const res = await apiClient.get<TApiResponse<T>>(p);
+        return res as unknown as TApiResponse<T>;
     };
 
     const createOne = async (payload: TCreate): Promise<T> => {
-        const res = await apiClient.post<T>(url, payload);
-        return res.data as T;
+        const res = await apiClient.post<TApiResponse<T>>(url, payload);
+        return res as unknown as T;
     };
 
     const updateOne = async (id: TId, data: TUpdate): Promise<T> => {
         const p = path(url, id);
-        const res = await apiClient.patch<T>(p, data);
-        return res.data as T;
+        const res = await apiClient.patch<TApiResponse<T>>(p, data);
+        return res as unknown as T;
     };
 
     const deleteOne = async (id: TId): Promise<unknown> => {
         const p = path(url, id);
-        const res = await apiClient.delete(p);
-        return res.data;
+        const res = await apiClient.delete<TApiResponse<unknown>>(p);
+        return res;
     };
 
     // Hooks
-    const useGetAll = (
-        options?: UseQueryOptions<T[], Error>
-    ) => {
-        return useQuery<T[], Error>({
-            queryKey: makeQueryKey(key),
-            queryFn: () => getAll(),
-            staleTime: defaultStaleTime,
-            retry: defaultRetry,
-            ...(options ?? {}),
-        });
-    };
-
-    const useGetAllWithParams = (
+  
+    const useGetAll = <TResult = TApiResponse<T[]>>(
         params?: Record<string, unknown>,
-        options?: UseQueryOptions<T[], Error>
+        options?: UseQueryOptions<TApiResponse<T[]>, Error, TResult>
     ) => {
-        return useQuery<T[], Error>({
+        return useQuery({
             queryKey: makeQueryKey(key, params),
             queryFn: () => getAll(params),
             staleTime: defaultStaleTime,
@@ -90,12 +93,14 @@ export function createResourceApi<T, TCreate = Partial<T>, TUpdate = Partial<T>,
         });
     };
 
-    const useGetById = (
+
+
+    const useGetById = <TResult = TApiResponse<T>>(
         id?: TId,
-        options?: UseQueryOptions<T, Error>
+        options?: UseQueryOptions<TApiResponse<T>, Error, TResult>
     ) => {
-        return useQuery<T, Error>({
-            queryKey: makeQueryKey(key, id as unknown),
+        return useQuery({
+            queryKey: makeQueryKey(key, id),
             queryFn: () => getById(id),
             enabled: !!id,
             staleTime: defaultStaleTime,
@@ -110,18 +115,26 @@ export function createResourceApi<T, TCreate = Partial<T>, TUpdate = Partial<T>,
         const qc = useQueryClient();
         return useMutation<T, Error, TCreate, unknown>({
             mutationFn: (payload: TCreate) => createOne(payload),
-            onSuccess: () => qc.invalidateQueries({ queryKey: makeQueryKey(key) }),
+            onSuccess: () =>
+                qc.invalidateQueries({ queryKey: makeQueryKey(key) }),
             ...(options ?? {}),
         });
     };
 
     const useUpdateMutation = (
-        options?: UseMutationOptions<T, Error, { id: TId; data: TUpdate }, unknown>
+        options?: UseMutationOptions<
+            T,
+            Error,
+            { id: TId; data: TUpdate },
+            unknown
+        >
     ) => {
         const qc = useQueryClient();
         return useMutation<T, Error, { id: TId; data: TUpdate }, unknown>({
-            mutationFn: ({ id, data }: { id: TId; data: TUpdate }) => updateOne(id, data),
-            onSuccess: () => qc.invalidateQueries({ queryKey: makeQueryKey(key) }),
+            mutationFn: ({ id, data }: { id: TId; data: TUpdate }) =>
+                updateOne(id, data),
+            onSuccess: () =>
+                qc.invalidateQueries({ queryKey: makeQueryKey(key) }),
             ...(options ?? {}),
         });
     };
@@ -132,13 +145,17 @@ export function createResourceApi<T, TCreate = Partial<T>, TUpdate = Partial<T>,
         const qc = useQueryClient();
         return useMutation<unknown, Error, TId, unknown>({
             mutationFn: (id: TId) => deleteOne(id),
-            onSuccess: () => qc.invalidateQueries({ queryKey: makeQueryKey(key) }),
+            onSuccess: () =>
+                qc.invalidateQueries({ queryKey: makeQueryKey(key) }),
             ...(options ?? {}),
         });
     };
 
     // Prefetch helpers
-    const prefetchGetAll = async (qc: QueryClient, params?: Record<string, unknown>) => {
+    const prefetchGetAll = async (
+        qc: QueryClient,
+        params?: Record<string, unknown>
+    ) => {
         return qc.prefetchQuery({
             queryKey: makeQueryKey(key, params),
             queryFn: () => getAll(params),
@@ -164,7 +181,6 @@ export function createResourceApi<T, TCreate = Partial<T>, TUpdate = Partial<T>,
 
         // hooks (primary - conventional)
         useGetAll,
-        useGetAllWithParams,
         useGetById,
         useCreateMutation,
         useUpdateMutation,
@@ -177,8 +193,6 @@ export function createResourceApi<T, TCreate = Partial<T>, TUpdate = Partial<T>,
         // metadata
         key,
         url,
-
-
     } as const;
 }
 

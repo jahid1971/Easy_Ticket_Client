@@ -70,7 +70,7 @@ export function LocationCombobox({
                             >
                                 <span className={cn(!field.value && "text-muted-foreground")}>
                                     {field.value
-                                        ? options.find((o) => o.value === field.value)?.label
+                                        ? options?.find((o) => o.value === field.value)?.label
                                         : placeholder ?? `Select ${label.toLowerCase()}...`}
                                 </span>
                                 {/* <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" /> */}
@@ -87,7 +87,7 @@ export function LocationCombobox({
                                 <CommandList>
                                     <CommandEmpty>No result found.</CommandEmpty>
                                     <CommandGroup>
-                                        {options.map((opt) => (
+                                        {options?.map((opt) => (
                                             <CommandItem
                                                 key={opt.value}
                                                 value={opt.value}

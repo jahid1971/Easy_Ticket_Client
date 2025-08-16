@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import authService from "@/Apis/authApi";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FcGoogle } from "react-icons/fc";
 
 type FormValues = {
     email: string;
@@ -30,6 +31,14 @@ export default function LoginPage() {
             console.error(e);
             alert(e?.response?.data?.message || "Login failed");
         }
+    }
+
+    function handleGoogleLogin() {
+        // redirect to server OAuth endpoint; include redirect back to current page if needed
+        const redirect = typeof window !== "undefined" ? window.location.pathname : "";
+        const base = "/api/v1/auth/google";
+        const url = redirect ? `${base}?redirect=${encodeURIComponent(redirect)}` : base;
+        window.location.href = url;
     }
 
     return (
@@ -93,6 +102,18 @@ export default function LoginPage() {
                             </Button>
                         </div>
                     </form>
+
+                    <div className="mt-4">
+                        <Button
+                            type="button"
+                            onClick={handleGoogleLogin}
+                            className="w-full inline-flex items-center justify-center gap-2"
+                            variant="outline"
+                        >
+                            <FcGoogle className="w-5 h-5" />
+                            Continue with Google
+                        </Button>
+                    </div>
 
                     <p className="mt-4 text-sm text-gray-500">
                         Don't have an account?{" "}

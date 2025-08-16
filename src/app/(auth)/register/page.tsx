@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import authService from "@/Apis/authApi";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FcGoogle } from "react-icons/fc";
+import { baseUrl } from "@/constants/common";
 
 type FormValues = {
     firstName: string;
@@ -52,6 +54,16 @@ export default function RegisterPage() {
             console.error(e);
             alert(e?.response?.data?.message || "Registration failed");
         }
+    }
+
+    function handleGoogleRegister() {
+        //   const redirectPath = searchParams.redirect;
+        const redirect =
+            typeof window !== "undefined" ? window.location.pathname : "";
+        const url = redirect
+            ? `${baseUrl}/auth/google?redirect=${encodeURIComponent(redirect)}`
+            : `${baseUrl}/auth/google`;
+        window.location.href = url;
     }
 
     const genderValue = watch("gender");
@@ -222,6 +234,17 @@ export default function RegisterPage() {
                         </div>
                     </form>
 
+                    <div className="mt-4 md:col-span-2">
+                        <Button
+                            type="button"
+                            onClick={handleGoogleRegister}
+                            className="w-full inline-flex items-center justify-center gap-2"
+                            variant="outline"
+                        >
+                            <FcGoogle className="w-5 h-5" />
+                            Continue with Google
+                        </Button>
+                    </div>
                     <p className="text-sm text-gray-500 mt-4 text-center">
                         Already have an account?{" "}
                         <Link
