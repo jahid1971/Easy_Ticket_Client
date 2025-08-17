@@ -35,6 +35,8 @@ alwaysApply: true
 
 - Ui should look beautiful and follow modern ui design principles.
 
+- try to use react-icon where they needs
+
 ## Code Style and Readability
 - try to mainatain type safety  . avoid  unnecessary types. Create and reuse types in `src/types` folder mirroring the reference naming style.
 - 4 spaces indentation. Add empty lines between logical blocks for readability.

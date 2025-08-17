@@ -1,4 +1,5 @@
 import { TRoute } from "./Route";
+import type { TSchedule } from './Schedule';
 
 export type SeatMapLayout = string[][];
 
@@ -23,6 +24,7 @@ export type TBus = {
     coverImageUrl?: string | null;
     createdAt: string;
     updatedAt: string;
+    schedules?: TSchedule[];
 };
 
 export interface BusCreateInput {

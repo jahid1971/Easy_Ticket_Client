@@ -20,6 +20,7 @@ type TCustomSelectProps = {
     required?: boolean;
     className?: string;
     defaultValue?: string;
+    placeholder?: string;
 };
 
 const CustomSelect: React.FC<TCustomSelectProps> = ({
@@ -31,6 +32,7 @@ const CustomSelect: React.FC<TCustomSelectProps> = ({
     required,
     className,
     defaultValue,
+    placeholder,
 }) => {
     return (
         <Controller
@@ -39,32 +41,34 @@ const CustomSelect: React.FC<TCustomSelectProps> = ({
             rules={required ? { required: `${label} is required` } : undefined}
             defaultValue={defaultValue ?? ""}
             render={({ field, fieldState: { error } }) => (
-                <Select
-                    disabled={disabled}
-                    onValueChange={field.onChange}
-                    value={field.value}
-                >
-                    <SelectTrigger id={id} className={className}>
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>{label ? label : id}</SelectLabel>
-                            {options?.map((option, index) => (
-                                <SelectItem
-                                    className="cursor-pointer"
-                                    key={index}
-                                    value={option.value}
-                                >
-                                    {option.label}
-                                </SelectItem>
-                            ))}
-                        </SelectGroup>
-                    </SelectContent>
+                <div className="space-y-2">
+                    <Select
+                        disabled={disabled}
+                        onValueChange={field.onChange}
+                        value={field.value}
+                    >
+                        <SelectTrigger id={id} className={className}>
+                            <SelectValue placeholder={placeholder || `Select ${label}`} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectGroup>
+                                <SelectLabel>{label ? label : id}</SelectLabel>
+                                {options?.filter(option => option.value !== "").map((option, index) => (
+                                    <SelectItem
+                                        className="cursor-pointer"
+                                        key={index}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
+                        </SelectContent>
+                    </Select>
                     {error && (
                         <p className="text-red-500 text-sm">{error.message}</p>
                     )}
-                </Select>
+                </div>
             )}
         />
     );

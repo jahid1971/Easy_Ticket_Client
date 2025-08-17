@@ -1,7 +1,4 @@
----
-trigger: always_on
-alwaysApply: true
----
+
 # GitHub Copilot Instructions (Client)
 
 ## Context

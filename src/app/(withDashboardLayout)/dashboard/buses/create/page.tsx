@@ -5,7 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Save, Bus, Image, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import { C_Input } from "@/components/ui/C_Input";
 import CustomSelect from "@/components/ui/C_Select";
 import { Label } from "@/components/ui/label";
@@ -15,7 +21,7 @@ import { BusCreateInput } from "@/types/Bus";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import tryCatch from "@/utils/tryCatch";
-import { busCreateSchema } from "@/utils/validationSchemas";
+import { busCreateSchema } from "@/utils/validations/validationSchemas";
 import SeatMapEditor from "@/components/dashboard/SeatMapEditor";
 import { useState } from "react";
 
@@ -30,7 +36,7 @@ const CreateBusPage = () => {
             rightSide: [2, 3],
         },
     });
-    
+
     const {
         control,
         handleSubmit,
@@ -44,17 +50,18 @@ const CreateBusPage = () => {
             operator: "",
             registrationNumber: "",
             seatMap: seatMapData,
-            routeId: "",
+            routeId: "no-route",
         },
     });
-    
+
     const createBusMutation = useCreateBus();
     const { data: routesData } = useGetBusRoutes();
 
-    const routeOptions = routesData?.data?.map((route) => ({
-        value: route.id,
-        label: route.routeName || `${route.source} - ${route.destination}`,
-    })) || [];
+    const routeOptions =
+        routesData?.data?.map((route) => ({
+            value: route.id,
+            label: route.routeName || `${route.source} - ${route.destination}`,
+        })) || [];
 
     const onSeatMapChange = (newSeatMap: any) => {
         setSeatMapData(newSeatMap);
@@ -69,9 +76,10 @@ const CreateBusPage = () => {
                     operator: data.operator,
                     registrationNumber: data.registrationNumber,
                     seatMap: data.seatMap,
-                    routeId: data.routeId || undefined,
+                    routeId:
+                        data.routeId === "no-route" ? undefined : data.routeId,
                 };
-                
+
                 return createBusMutation.mutateAsync(busData);
             },
             "Creating bus",
@@ -95,7 +103,9 @@ const CreateBusPage = () => {
                         <Bus className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                        <h2 className="text-3xl font-bold tracking-tight">Create Bus</h2>
+                        <h2 className="text-3xl font-bold tracking-tight">
+                            Create Bus
+                        </h2>
                         <p className="text-muted-foreground">
                             Add a new bus to your fleet
                         </p>
@@ -180,10 +190,14 @@ const CreateBusPage = () => {
                                         label="Route"
                                         control={control}
                                         options={[
-                                            { value: "", label: "No Route Assigned" },
+                                            {
+                                                value: "no-route",
+                                                label: "No Route Assigned",
+                                            },
                                             ...routeOptions,
                                         ]}
-                                        defaultValue=""
+                                        defaultValue="no-route"
+                                        placeholder="Select a route"
                                     />
                                 </CardContent>
                             </Card>
@@ -196,14 +210,16 @@ const CreateBusPage = () => {
                                         Bus Image
                                     </CardTitle>
                                     <CardDescription>
-                                        Upload a cover image for the bus (coming soon)
+                                        Upload a cover image for the bus (coming
+                                        soon)
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
                                         <Image className="mx-auto h-12 w-12 text-gray-400" />
                                         <p className="mt-2 text-sm text-gray-600">
-                                            Image upload functionality coming soon
+                                            Image upload functionality coming
+                                            soon
                                         </p>
                                     </div>
                                 </CardContent>
@@ -215,19 +231,28 @@ const CreateBusPage = () => {
                                     <div className="space-y-3">
                                         <Button
                                             type="submit"
-                                            disabled={isSubmitting || createBusMutation.isPending}
+                                            disabled={
+                                                isSubmitting ||
+                                                createBusMutation.isPending
+                                            }
                                             className="w-full"
                                         >
                                             <Save className="mr-2 h-4 w-4" />
-                                            {isSubmitting || createBusMutation.isPending
+                                            {isSubmitting ||
+                                            createBusMutation.isPending
                                                 ? "Creating Bus..."
                                                 : "Create Bus"}
                                         </Button>
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            onClick={() => router.push("/dashboard/buses")}
-                                            disabled={isSubmitting || createBusMutation.isPending}
+                                            onClick={() =>
+                                                router.push("/dashboard/buses")
+                                            }
+                                            disabled={
+                                                isSubmitting ||
+                                                createBusMutation.isPending
+                                            }
                                             className="w-full"
                                         >
                                             Cancel

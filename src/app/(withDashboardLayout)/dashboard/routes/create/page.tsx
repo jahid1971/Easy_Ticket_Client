@@ -15,7 +15,7 @@ import { RouteCreateInput } from "@/types/Route";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import tryCatch from "@/utils/tryCatch";
-import { routeCreateSchema } from "@/utils/validationSchemas";
+import { routeCreateSchema } from "@/utils/validations/validationSchemas";
 
 type RouteFormData = z.infer<typeof routeCreateSchema>;
 

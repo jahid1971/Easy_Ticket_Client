@@ -31,50 +31,58 @@ model Bus {
     createdAt          DateTime   @default(now())
     updatedAt          DateTime   @updatedAt
     schedules          Schedule[]
-    routeId            String
-    route              Route?     @relation(fields: [routeId], references: [id])
+    routeId            String?
+    route              Route?     @relation(fields: [routeId], references: [id], onDelete: SetNull)
 }
 
 model Route {
-    id             String          @id @default(uuid())
-    routeName      String?
-    description    String?
-    source         String
-    destination    String
-    distance       Float
-    createdAt      DateTime        @default(now())
-    updatedAt      DateTime        @updatedAt
-    status         RouteStatus     @default(ACTIVE) // ACTIVE, INACTIVE  
-    schedules      Schedule[]
-    buses          Bus[] 
-    boardingPoints BoardingPoint[]
-    droppingPoints DroppingPoint[]
+    id          String      @id @default(uuid())
+    routeName   String?
+    description String?
+    source      String
+    destination String
+    distance    Float
+    createdAt   DateTime    @default(now())
+    updatedAt   DateTime    @updatedAt
+    status      RouteStatus @default(ACTIVE) // ACTIVE, INACTIVE  
+    schedules   Schedule[]
+    buses       Bus[]
+    routeStops  RouteStop[]
 }
 
-model BoardingPoint {
-    id            String   @id @default(uuid())
-    routeId       String
-    name          String
-    address       String?
-    city          String?
-    order         Int // order in the route
-    startingPoint Boolean  @default(false)
-    route         Route    @relation(fields: [routeId], references: [id])
-    createdAt     DateTime @default(now())
-    updatedAt     DateTime @updatedAt
+model BusStop {
+    id         String      @id @default(uuid())
+    name       String
+    address    String?
+    city       String?
+    latitude   Float?
+    longitude  Float?
+    createdAt  DateTime    @default(now())
+    updatedAt  DateTime    @updatedAt
+    routeStops RouteStop[]
 }
 
-model DroppingPoint {
-    id          String   @id @default(uuid())
-    routeId     String
-    name        String
-    address     String?
-    city        String?
-    order       Int // order in the route
-    endingPoint Boolean  @default(false)
-    route       Route    @relation(fields: [routeId], references: [id])
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
+enum StopType {
+    BOARDING
+    DROPPING
+    BOTH
+}
+
+model RouteStop {
+    id               String    @id @default(uuid())
+    routeId          String
+    busStopId        String
+    order            Int
+    stopType         StopType  @default(BOTH)
+    route            Route     @relation(fields: [routeId], references: [id])
+    busStop          BusStop   @relation(fields: [busStopId], references: [id])
+    createdAt        DateTime  @default(now())
+    updatedAt        DateTime  @updatedAt
+    boardingBookings Booking[] @relation("booking_boarding")
+    droppingBookings Booking[] @relation("booking_dropping")
+
+    @@unique([routeId, order])
+    @@unique([routeId, busStopId])
 }
 
 model Schedule {
@@ -104,18 +112,22 @@ model Seat {
 }
 
 model Booking {
-    id         String   @id @default(uuid())
-    userId     String
-    scheduleId String
-    seatId     String
-    status     String // booked, cancelled, pending
-    paymentId  String?
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
-    user       User     @relation(fields: [userId], references: [id])
-    schedule   Schedule @relation(fields: [scheduleId], references: [id])
-    seat       Seat     @relation(fields: [seatId], references: [id])
-    payment    Payment? @relation(fields: [paymentId], references: [id])
+    id             String     @id @default(uuid())
+    userId         String
+    scheduleId     String
+    seatId         String
+    status         String // booked, cancelled, pending
+    paymentId      String?
+    createdAt      DateTime   @default(now())
+    updatedAt      DateTime   @updatedAt
+    user           User       @relation(fields: [userId], references: [id])
+    schedule       Schedule   @relation(fields: [scheduleId], references: [id])
+    seat           Seat       @relation(fields: [seatId], references: [id])
+    payment        Payment?   @relation(fields: [paymentId], references: [id])
+    boardingStopId String?
+    droppingStopId String?
+    boardingStop   RouteStop? @relation("booking_boarding", fields: [boardingStopId], references: [id], onDelete: SetNull)
+    droppingStop   RouteStop? @relation("booking_dropping", fields: [droppingStopId], references: [id], onDelete: SetNull)
 }
 
 model Payment {

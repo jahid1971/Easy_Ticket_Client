@@ -14,7 +14,7 @@ import { BusUpdateInput } from "@/types/Bus";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import tryCatch from "@/utils/tryCatch";
-import { busUpdateSchema } from "@/utils/validationSchemas";
+import { busUpdateSchema } from "@/utils/validations/validationSchemas";
 import SeatMapEditor from "@/components/dashboard/SeatMapEditor";
 import { useState, useEffect } from "react";
 

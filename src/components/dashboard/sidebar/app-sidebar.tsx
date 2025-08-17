@@ -14,31 +14,109 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarTrigger,
-  SidebarInset,
-  SidebarProvider,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar"
-import { Home, MapPin, Bus, PanelLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { 
+  Home, 
+  MapPin, 
+  Bus, 
+  Route, 
+  Calendar, 
+  Users, 
+  CreditCard,
+  BarChart3 
+} from "lucide-react"
 import { useAppSidebar } from "@/hooks/use-app-sidebar"
 import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
 
 export function AppSidebar() {
     const { isCollapsed, isAnimating } = useAppSidebar()
 
+    // Navigation items organized by sections
+    const navigationSections = [
+        {
+            label: "Overview",
+            items: [
+                {
+                    title: "Dashboard",
+                    href: "/dashboard",
+                    icon: Home,
+                    tooltip: "Dashboard Overview"
+                }
+            ]
+        },
+        {
+            label: "Fleet Management",
+            items: [
+                {
+                    title: "Routes",
+                    href: "/dashboard/routes",
+                    icon: Route,
+                    tooltip: "Manage Routes"
+                },
+                {
+                    title: "Bus Stops",
+                    href: "/dashboard/bus-stops",
+                    icon: MapPin,
+                    tooltip: "Manage Bus Stops"
+                },
+                {
+                    title: "Buses",
+                    href: "/dashboard/buses",
+                    icon: Bus,
+                    tooltip: "Manage Buses"
+                },
+                {
+                    title: "Schedules",
+                    href: "/dashboard/schedules",
+                    icon: Calendar,
+                    tooltip: "Manage Schedules"
+                }
+            ]
+        },
+        {
+            label: "Operations",
+            items: [
+                {
+                    title: "Bookings",
+                    href: "/dashboard/bookings",
+                    icon: Users,
+                    tooltip: "Manage Bookings"
+                },
+                {
+                    title: "Payments",
+                    href: "/dashboard/payments",
+                    icon: CreditCard,
+                    tooltip: "Payment Management"
+                }
+            ]
+        },
+        {
+            label: "Analytics",
+            items: [
+                {
+                    title: "Reports",
+                    href: "/dashboard/reports",
+                    icon: BarChart3,
+                    tooltip: "View Reports"
+                }
+            ]
+        }
+    ]
+
     return (
         <Sidebar variant="sidebar" collapsible="icon">
             <SidebarHeader>
                 <div className="flex items-center justify-between px-2 py-1">
                     <div className="flex items-center gap-2 min-w-0">
-                        <div className={`transition-all duration-200 ${isAnimating ? 'opacity-75' : 'opacity-100'}`}>
+                        <div className={`transition-all duration-200 ${
+                            isAnimating ? 'opacity-75' : 'opacity-100'
+                        }`}>
                             {!isCollapsed && (
-                                <span className="text-lg font-semibold truncate">EasyTicket</span>
+                                <span className="text-lg font-semibold truncate">
+                                    EasyTicket
+                                </span>
                             )}
-                            {/* {isCollapsed && (
-                                <span className="text-lg font-semibold">ET</span>
-                            )} */}
                         </div>
                     </div>
                     <SidebarTrigger />
@@ -46,49 +124,44 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <SidebarGroup>
-                    {!isCollapsed && (
-                        <SidebarGroupLabel className="transition-opacity duration-200">
-                            Admin
-                        </SidebarGroupLabel>
-                    )}
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild tooltip={isCollapsed ? "Dashboard Overview" : undefined}>
-                                    <Link href="/dashboard" className="flex items-center gap-2 transition-all duration-200">
-                                        <Home className="shrink-0" /> 
-                                        <span className={`transition-all duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'} overflow-hidden`}>
-                                            Overview
-                                        </span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild tooltip={isCollapsed ? "Manage Routes" : undefined}>
-                                    <Link href="/dashboard/routes" className="flex items-center gap-2 transition-all duration-200">
-                                        <MapPin className="shrink-0" /> 
-                                        <span className={`transition-all duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'} overflow-hidden`}>
-                                            Routes
-                                        </span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-
-                            <SidebarMenuItem>
-                                <SidebarMenuButton asChild tooltip={isCollapsed ? "Manage Buses" : undefined}>
-                                    <Link href="/dashboard/buses" className="flex items-center gap-2 transition-all duration-200">
-                                        <Bus className="shrink-0" /> 
-                                        <span className={`transition-all duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'} overflow-hidden`}>
-                                            Buses
-                                        </span>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {navigationSections.map((section, sectionIndex) => (
+                    <SidebarGroup key={section.label}>
+                        {!isCollapsed && (
+                            <SidebarGroupLabel className="transition-opacity duration-200">
+                                {section.label}
+                            </SidebarGroupLabel>
+                        )}
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                {section.items.map((item) => {
+                                    const IconComponent = item.icon
+                                    return (
+                                        <SidebarMenuItem key={item.href}>
+                                            <SidebarMenuButton 
+                                                asChild 
+                                                tooltip={isCollapsed ? item.tooltip : undefined}
+                                            >
+                                                <Link 
+                                                    href={item.href} 
+                                                    className="flex items-center gap-2 transition-all duration-200"
+                                                >
+                                                    <IconComponent className="shrink-0" size={20} />
+                                                    <span className={`transition-all duration-200 ${
+                                                        isCollapsed 
+                                                            ? 'w-0 opacity-0' 
+                                                            : 'w-auto opacity-100'
+                                                    } overflow-hidden`}>
+                                                        {item.title}
+                                                    </span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )
+                                })}
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                ))}
             </SidebarContent>
 
             <SidebarFooter>
@@ -115,6 +188,5 @@ export function AppSidebar() {
 }
 
 export default function AppSidebarWrapper({ children }: { children?: React.ReactNode }) {
-    // Provide a simple wrapper that returns the sidebar component.
     return <AppSidebar />
 }
