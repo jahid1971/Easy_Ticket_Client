@@ -10,7 +10,7 @@ export type ColumnPosition = {
 
 export type SeatMap = {
     layout: SeatMapLayout;
-    columnPosition?: ColumnPosition;
+    spaceAfterColumn : number;
 };
 
 export type TBus = {

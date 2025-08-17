@@ -31,10 +31,7 @@ const CreateBusPage = () => {
     const router = useRouter();
     const [seatMapData, setSeatMapData] = useState({
         layout: [],
-        columnPosition: {
-            leftSide: [0, 1],
-            rightSide: [2, 3],
-        },
+        spaceAfterColumn: "2",
     });
 
     const {
@@ -69,13 +66,23 @@ const CreateBusPage = () => {
     };
 
     const onSubmit = async (data: BusFormData) => {
+
+              console.log(data,"form data");
+
+                return 
         await tryCatch(
             async () => {
+
+          
                 const busData: BusCreateInput = {
                     name: data.name,
                     operator: data.operator,
                     registrationNumber: data.registrationNumber,
-                    seatMap: data.seatMap,
+                    seatMap: {
+                        ...data.seatMap,
+                        // ensure server-facing shape uses a number for spaceAfterColumn
+                        spaceAfterColumn: Number(data.seatMap.spaceAfterColumn) || 0,
+                    },
                     routeId:
                         data.routeId === "no-route" ? undefined : data.routeId,
                 };
@@ -168,6 +175,8 @@ const CreateBusPage = () => {
                                 seatMap={seatMapData}
                                 onChange={onSeatMapChange}
                                 error={errors.seatMap?.message}
+                                control={control}
+                                watch={watch}
                             />
                         </div>
 

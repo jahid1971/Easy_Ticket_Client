@@ -13,14 +13,15 @@ import {
 
 type TCustomSelectProps = {
     id: string;
-    label: string;
+    label?: string;
     options: { value: string; label: string }[];
     disabled?: boolean;
     control?: any;
     required?: boolean;
     className?: string;
-    defaultValue?: string;
+    defaultValue?: string | number;
     placeholder?: string;
+    size?: "sm" | "default" | "xsm" 
 };
 
 const CustomSelect: React.FC<TCustomSelectProps> = ({
@@ -33,6 +34,7 @@ const CustomSelect: React.FC<TCustomSelectProps> = ({
     className,
     defaultValue,
     placeholder,
+    size = "sm",
 }) => {
     return (
         <Controller
@@ -46,8 +48,9 @@ const CustomSelect: React.FC<TCustomSelectProps> = ({
                         disabled={disabled}
                         onValueChange={field.onChange}
                         value={field.value}
+
                     >
-                        <SelectTrigger id={id} className={className}>
+                        <SelectTrigger size={size} id={id} className={className}>
                             <SelectValue placeholder={placeholder || `Select ${label}`} />
                         </SelectTrigger>
                         <SelectContent>
