@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
  function Navbar() {
 	const [open, setOpen] = React.useState(false); // reserved for future mobile menu
@@ -28,8 +29,9 @@ import { Button } from "@/components/ui/button";
 					<Link href="/contact" className="text-foreground/80 hover:text-primary transition-colors">Contact</Link>
 				</nav>
 
-				{/* Right: Auth actions */}
+				{/* Right: Theme toggle and Auth actions */}
 				<div className="hidden md:flex items-center gap-3">
+					<ThemeToggle />
 					<Button asChild variant="outline">
 						<Link href="/login" aria-label="Login">Login</Link>
 					</Button>
@@ -38,16 +40,19 @@ import { Button } from "@/components/ui/button";
 					</Button>
 				</div>
 
-				{/* Mobile: menu toggle */}
-				<button
-					type="button"
-					className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-					aria-label="Toggle menu"
-					aria-expanded={open}
-					onClick={() => setOpen((v) => !v)}
-				>
-					<Menu className="size-5" />
-				</button>
+				{/* Mobile: theme toggle and menu toggle */}
+				<div className="md:hidden flex items-center gap-2">
+					<ThemeToggle />
+					<button
+						type="button"
+						className="inline-flex items-center justify-center rounded-md p-2 text-foreground/80 hover:text-foreground hover:bg-accent/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						aria-label="Toggle menu"
+						aria-expanded={open}
+						onClick={() => setOpen((v) => !v)}
+					>
+						<Menu className="size-5" />
+					</button>
+				</div>
 			</div>
 		</header>
 	);

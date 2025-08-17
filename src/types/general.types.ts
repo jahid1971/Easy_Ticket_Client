@@ -16,6 +16,11 @@ export type TQuery<T = Record<string, unknown>> = {
     [key: string]: any;
 } & Partial<T>;
 
+export type TQueryParam = {
+    name: string;
+    value: any;
+};
+
 export type TApiResponse<U> = {
     success?: boolean;
     statusCode?: number;

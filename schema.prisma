@@ -1,0 +1,150 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL_STRING")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    id        String     @id @default(uuid())
+    name      String
+    email     String     @unique
+    phone     String?    @unique
+    password  String
+    role      UserRole
+    status    UserStatus @default(ACTIVE)
+    createdAt DateTime   @default(now())
+    updatedAt DateTime   @updatedAt
+    bookings  Booking[]
+    payments  Payment[]
+}
+
+model Bus {
+    id                 String     @id @default(uuid())
+    name               String
+    operator           String
+    seatMap            Json // stores seat layout template
+    registrationNumber String
+    coverImageUrl      String? // Optional URL for the bus photo
+    createdAt          DateTime   @default(now())
+    updatedAt          DateTime   @updatedAt
+    schedules          Schedule[]
+    routeId            String
+    route              Route?     @relation(fields: [routeId], references: [id])
+}
+
+model Route {
+    id             String          @id @default(uuid())
+    routeName      String?
+    description    String?
+    source         String
+    destination    String
+    distance       Float
+    createdAt      DateTime        @default(now())
+    updatedAt      DateTime        @updatedAt
+    status         RouteStatus     @default(ACTIVE) // ACTIVE, INACTIVE  
+    schedules      Schedule[]
+    buses          Bus[] 
+    boardingPoints BoardingPoint[]
+    droppingPoints DroppingPoint[]
+}
+
+model BoardingPoint {
+    id            String   @id @default(uuid())
+    routeId       String
+    name          String
+    address       String?
+    city          String?
+    order         Int // order in the route
+    startingPoint Boolean  @default(false)
+    route         Route    @relation(fields: [routeId], references: [id])
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+}
+
+model DroppingPoint {
+    id          String   @id @default(uuid())
+    routeId     String
+    name        String
+    address     String?
+    city        String?
+    order       Int // order in the route
+    endingPoint Boolean  @default(false)
+    route       Route    @relation(fields: [routeId], references: [id])
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
+
+model Schedule {
+    id            String    @id @default(uuid())
+    busId         String
+    routeId       String
+    departureTime DateTime
+    arrivalTime   DateTime
+    price         Float
+    date          DateTime
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+    bus           Bus       @relation(fields: [busId], references: [id])
+    route         Route     @relation(fields: [routeId], references: [id])
+    seats         Seat[]
+    bookings      Booking[]
+}
+
+model Seat {
+    id         String @id @default(uuid())
+    scheduleId String
+
+    seatNumber String
+    isBooked   Boolean   @default(false)
+    schedule   Schedule  @relation(fields: [scheduleId], references: [id])
+    bookings   Booking[]
+}
+
+model Booking {
+    id         String   @id @default(uuid())
+    userId     String
+    scheduleId String
+    seatId     String
+    status     String // booked, cancelled, pending
+    paymentId  String?
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+    user       User     @relation(fields: [userId], references: [id])
+    schedule   Schedule @relation(fields: [scheduleId], references: [id])
+    seat       Seat     @relation(fields: [seatId], references: [id])
+    payment    Payment? @relation(fields: [paymentId], references: [id])
+}
+
+model Payment {
+    id            String    @id @default(uuid())
+    userId        String
+    amount        Float
+    status        String // pending, completed, failed
+    method        String // card, mobile banking, etc.
+    transactionId String
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
+    user          User      @relation(fields: [userId], references: [id])
+    bookings      Booking[]
+}
+
+enum UserRole {
+    USER
+    ADMIN
+    OPERATOR
+    SUPER_ADMIN
+}
+
+enum UserStatus {
+    ACTIVE
+    BLOCKED
+    DELETED
+}
+
+enum RouteStatus {
+    ACTIVE
+    INACTIVE
+}

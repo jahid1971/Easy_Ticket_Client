@@ -3,46 +3,46 @@
 import { useState, useMemo, useRef, useCallback } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useGetBusRoutes, useDeleteBusRoute } from "@/Apis/busRouteApi";
-import { TRoute } from "@/types/Route";
+import { useGetBuses, useDeleteBus } from "@/Apis/busApi";
+import { TBus } from "@/types/Bus";
 import { TQueryParam } from "@/types/general.types";
 import { defaultParams } from "@/constants/common";
-import { routeColumnDefs, IRouteRow } from "./ColumnDefs";
+import { busColumnDefs, IBusRow } from "./ColumnDefs";
 import DataTable from "@/components/dashboard/table/DataTable";
 import Link from "next/link";
 
-const RoutesPage = () => {
+const BusesPage = () => {
     const [params, setParams] = useState<TQueryParam[]>(defaultParams);
     const [deleteIds, setDeleteIds] = useState<string[]>([]);
-    const selectedRowsRef = useRef<IRouteRow[]>([]);
+    const selectedRowsRef = useRef<IBusRow[]>([]);
 
-    const { data: routesData, isFetching } = useGetBusRoutes(params);
-    const deleteRouteMutation = useDeleteBusRoute();
+    const { data: busesData, isFetching } = useGetBuses(params);
+    const deleteBusMutation = useDeleteBus();
 
-    const routes = useMemo(() => {
-        return routesData?.data?.map((route: TRoute) => ({
-            ...route,
-            routeData: route,
+    const buses = useMemo(() => {
+        return busesData?.data?.map((bus: TBus) => ({
+            ...bus,
+            busData: bus,
         })) || [];
-    }, [routesData?.data]);
+    }, [busesData?.data]);
 
-    const handleDeleteRoute = useCallback((id: string) => {
-        if (confirm("Are you sure you want to delete this route?")) {
-            deleteRouteMutation.mutate(id);
+    const handleDeleteBus = useCallback((id: string) => {
+        if (confirm("Are you sure you want to delete this bus?")) {
+            deleteBusMutation.mutate(id);
         }
-    }, [deleteRouteMutation]);
+    }, [deleteBusMutation]);
 
-    const columnDefs = useMemo(() => routeColumnDefs(handleDeleteRoute), [handleDeleteRoute]);
+    const columnDefs = useMemo(() => busColumnDefs(handleDeleteBus), [handleDeleteBus]);
 
     const handleSelectedRows = useCallback((rows: any) => {
         selectedRowsRef.current = rows;
     }, []);
 
     const createButton = (
-        <Link href="/dashboard/routes/create">
+        <Link href="/dashboard/buses/create">
             <Button size="sm">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Route
+                Add Bus
             </Button>
         </Link>
     );
@@ -53,7 +53,7 @@ const RoutesPage = () => {
             variant="destructive"
             onClick={() =>
                 setDeleteIds(
-                    selectedRowsRef.current.map((row: IRouteRow) => row.id)
+                    selectedRowsRef.current.map((row: IBusRow) => row.id)
                 )
             }
         >
@@ -62,11 +62,11 @@ const RoutesPage = () => {
     );
 
     return (
-        <div >
+        <div>
             <DataTable
-                title="ROUTES"
+                title="BUSES"
                 searchField
-                rowData={routes}
+                rowData={buses}
                 columnDefs={columnDefs}
                 isFetching={isFetching}
                 handleSelectedRows={handleSelectedRows}
@@ -74,11 +74,11 @@ const RoutesPage = () => {
                 setParams={setParams}
                 createButton={createButton}
                 checkedRowsActionBtn={checkedRowsActionBtn}
-                metaData={routesData?.meta}
-                minWidth={1000}
+                metaData={busesData?.meta}
+                minWidth={1200}
             />
         </div>
     );
 };
 
-export default RoutesPage;
+export default BusesPage;

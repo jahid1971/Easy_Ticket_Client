@@ -1,4 +1,3 @@
-
 export type RouteStatus = "ACTIVE" | "INACTIVE";
 
 export type TRoute = {
@@ -14,8 +13,10 @@ export type TRoute = {
 };
 
 export interface RouteCreateInput {
+    routeName?: string;
     source: string;
     destination: string;
     distance: number;
+    description?: string;
     status?: RouteStatus;
 }

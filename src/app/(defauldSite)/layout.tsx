@@ -1,4 +1,4 @@
-import Navbar from "@/components/ui/Navbar";
+import Navbar from "@/components/shared/Navbar";
 
 export const metadata = {
     title: 'EasyTicket',

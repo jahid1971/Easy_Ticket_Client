@@ -22,6 +22,7 @@ import {
 import { Home, MapPin, Bus, PanelLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useAppSidebar } from "@/hooks/use-app-sidebar"
+import { SimpleThemeToggle } from "@/components/ui/theme-toggle"
 
 export function AppSidebar() {
     const { isCollapsed, isAnimating } = useAppSidebar()
@@ -91,7 +92,10 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <div className="p-2">
+                <div className="p-2 space-y-2">
+                    <div className="flex justify-center">
+                        <SimpleThemeToggle />
+                    </div>
                     {!isCollapsed && (
                         <div className="text-xs text-muted-foreground text-center transition-opacity duration-200">
                             Press <kbd className="px-1.5 py-0.5 text-xs bg-muted rounded">Ctrl+B</kbd> to toggle

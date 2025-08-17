@@ -1,74 +1,75 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { ArrowLeft, Save } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { ArrowLeft, Save, MapPin, Route as RouteIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { C_Input } from "@/components/ui/C_Input";
+import CustomSelect from "@/components/ui/C_Select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { useCreateBusRoute } from "@/Apis/busRouteApi";
 import { RouteCreateInput } from "@/types/Route";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import tryCatch from "@/utils/tryCatch";
+import { routeCreateSchema } from "@/utils/validationSchemas";
 
-type RouteFormData = {
-    routeName?: string;
-    source: string;
-    destination: string;
-    distance: number;
-    description?: string;
-    status: "ACTIVE" | "INACTIVE";
-};
+type RouteFormData = z.infer<typeof routeCreateSchema>;
 
 const CreateRoutePage = () => {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [formData, setFormData] = useState<RouteFormData>({
-        routeName: "",
-        source: "",
-        destination: "",
-        distance: 0,
-        description: "",
-        status: "ACTIVE",
-    });
     
-    const createRouteMutation = useCreateBusRoute({
-        onSuccess: () => {
-            router.push("/dashboard/routes");
+    const {
+        control,
+        handleSubmit,
+        register,
+        formState: { errors, isSubmitting },
+    } = useForm<RouteFormData>({
+        resolver: zodResolver(routeCreateSchema),
+        defaultValues: {
+            routeName: "",
+            source: "",
+            destination: "",
+            distance: 0,
+            description: "",
+            status: "ACTIVE",
         },
     });
+    
+    const createRouteMutation = useCreateBusRoute();
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-        
-        const routeData: RouteCreateInput = {
-            source: formData.source,
-            destination: formData.destination,
-            distance: formData.distance,
-            status: formData.status,
-        };
-        
-        createRouteMutation.mutate(routeData, {
-            onSettled: () => setIsLoading(false),
-        });
-    };
-
-    const handleInputChange = (field: keyof RouteFormData, value: string | number) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+    const onSubmit = async (data: RouteFormData) => {
+        await tryCatch(
+            async () => {
+                const routeData: RouteCreateInput = {
+                    source: data.source,
+                    destination: data.destination,
+                    distance: data.distance,
+                    status: data.status,
+                };
+                
+                // Add optional fields if they have values
+                if (data.routeName?.trim()) {
+                    (routeData as any).routeName = data.routeName;
+                }
+                if (data.description?.trim()) {
+                    (routeData as any).description = data.description;
+                }
+                
+                return createRouteMutation.mutateAsync(routeData);
+            },
+            "Creating route",
+            "Route created successfully!",
+            () => router.push("/dashboard/routes")
+        );
     };
 
     return (
         <div className="space-y-6">
+            {/* Header */}
             <div className="flex items-center gap-4">
                 <Button variant="ghost" size="sm" asChild>
                     <Link href="/dashboard/routes">
@@ -76,118 +77,157 @@ const CreateRoutePage = () => {
                         Back to Routes
                     </Link>
                 </Button>
-                <div>
-                    <h2 className="text-3xl font-bold tracking-tight">Create Route</h2>
-                    <p className="text-muted-foreground">
-                        Add a new bus route to your system
-                    </p>
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                        <RouteIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight">Create Route</h2>
+                        <p className="text-muted-foreground">
+                            Add a new bus route to your transportation network
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div className="max-w-2xl">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Route Information</CardTitle>
-                        <CardDescription>
-                            Enter the details for the new bus route
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
-                                <Label htmlFor="routeName">Route Name (Optional)</Label>
-                                <Input
-                                    id="routeName"
-                                    placeholder="e.g., Express Route 1"
-                                    value={formData.routeName}
-                                    onChange={(e) => handleInputChange('routeName', e.target.value)}
-                                />
-                            </div>
+            {/* Form */}
+            <div className="max-w-4xl">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid gap-6 lg:grid-cols-3">
+                        {/* Main Information Card */}
+                        <div className="lg:col-span-2">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <MapPin className="h-5 w-5" />
+                                        Route Information
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Enter the basic details for the new bus route
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-6">
+                                    {/* Route Name */}
+                                    <C_Input
+                                        id="routeName"
+                                        label="Route Name"
+                                        placeholder="e.g., Express Route 1, Highway Express"
+                                        control={control}
+                                        error={errors.routeName}
+                                    />
 
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div>
-                                    <Label htmlFor="source">Source *</Label>
-                                    <Input
-                                        id="source"
-                                        placeholder="e.g., Dhaka"
-                                        value={formData.source}
-                                        onChange={(e) => handleInputChange('source', e.target.value)}
+                                    {/* Source & Destination */}
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <C_Input
+                                            id="source"
+                                            label="Source"
+                                            placeholder="e.g., Dhaka, Chittagong"
+                                            control={control}
+                                            error={errors.source}
+                                            required
+                                        />
+                                        <C_Input
+                                            id="destination"
+                                            label="Destination"
+                                            placeholder="e.g., Sylhet, Cox's Bazar"
+                                            control={control}
+                                            error={errors.destination}
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Distance */}
+                                    <div className="max-w-md">
+                                        <C_Input
+                                            id="distance"
+                                            label="Distance (kilometers)"
+                                            type="number"
+                                            placeholder="0"
+                                            control={control}
+                                            error={errors.distance}
+                                            required
+                                            rules={{
+                                                valueAsNumber: true,
+                                                min: { value: 0.1, message: "Distance must be greater than 0" }
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Description */}
+                                    <div>
+                                        <Label htmlFor="description" className="block mb-1 text-sm font-medium">
+                                            Description
+                                        </Label>
+                                        <Textarea
+                                            id="description"
+                                            placeholder="Enter route description, special notes, or important information..."
+                                            rows={4}
+                                            className="resize-none"
+                                            {...register("description")}
+                                        />
+                                        {errors.description && (
+                                            <small className="text-destructive block mt-1">
+                                                {errors.description.message}
+                                            </small>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Status & Actions Card */}
+                        <div className="space-y-6">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Route Status</CardTitle>
+                                    <CardDescription>
+                                        Set the initial status for this route
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <CustomSelect
+                                        id="status"
+                                        label="Status"
+                                        control={control}
+                                        options={[
+                                            { value: "ACTIVE", label: "Active" },
+                                            { value: "INACTIVE", label: "Inactive" }
+                                        ]}
+                                        defaultValue="ACTIVE"
                                         required
                                     />
-                                </div>
+                                </CardContent>
+                            </Card>
 
-                                <div>
-                                    <Label htmlFor="destination">Destination *</Label>
-                                    <Input
-                                        id="destination"
-                                        placeholder="e.g., Chittagong"
-                                        value={formData.destination}
-                                        onChange={(e) => handleInputChange('destination', e.target.value)}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid gap-4 md:grid-cols-2">
-                                <div>
-                                    <Label htmlFor="distance">Distance (km) *</Label>
-                                    <Input
-                                        id="distance"
-                                        type="number"
-                                        step="0.1"
-                                        placeholder="0"
-                                        value={formData.distance}
-                                        onChange={(e) => handleInputChange('distance', parseFloat(e.target.value) || 0)}
-                                        required
-                                    />
-                                </div>
-
-                                <div>
-                                    <Label htmlFor="status">Status</Label>
-                                    <Select value={formData.status} onValueChange={(value: "ACTIVE" | "INACTIVE") => handleInputChange('status', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="ACTIVE">Active</SelectItem>
-                                            <SelectItem value="INACTIVE">Inactive</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <Label htmlFor="description">Description (Optional)</Label>
-                                <Textarea
-                                    id="description"
-                                    placeholder="Enter route description..."
-                                    rows={3}
-                                    value={formData.description}
-                                    onChange={(e) => handleInputChange('description', e.target.value)}
-                                />
-                            </div>
-
-                            <div className="flex gap-4 pt-4">
-                                <Button
-                                    type="submit"
-                                    disabled={isLoading || createRouteMutation.isPending}
-                                    className="flex-1"
-                                >
-                                    <Save className="mr-2 h-4 w-4" />
-                                    {isLoading || createRouteMutation.isPending ? "Creating..." : "Create Route"}
-                                </Button>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => router.push("/dashboard/routes")}
-                                    disabled={isLoading || createRouteMutation.isPending}
-                                >
-                                    Cancel
-                                </Button>
-                            </div>
-                        </form>
-                    </CardContent>
-                </Card>
+                            {/* Action Buttons */}
+                            <Card>
+                                <CardContent className="pt-6">
+                                    <div className="space-y-3">
+                                        <Button
+                                            type="submit"
+                                            disabled={isSubmitting || createRouteMutation.isPending}
+                                            className="w-full"
+                                        >
+                                            <Save className="mr-2 h-4 w-4" />
+                                            {isSubmitting || createRouteMutation.isPending
+                                                ? "Creating Route..."
+                                                : "Create Route"}
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => router.push("/dashboard/routes")}
+                                            disabled={isSubmitting || createRouteMutation.isPending}
+                                            className="w-full"
+                                        >
+                                            Cancel
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     );
