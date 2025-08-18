@@ -1,15 +1,17 @@
+````markdown
 Project index snapshot
 
-This folder contains a JSON snapshot of the repository layout to reuse across sessions.
+This folder contains JSON snapshots of the repository layout to reuse across sessions.
 
 Files:
 - `project-index.json` — serialized index of the project tree.
+- `project-index-compact.json` — compact per-file summaries for quick lookup.
 
 How to reuse in another session or machine
 
-1. Copy `project-index.json` to your new workspace root.
+1. Copy the `project-index*.json` files to your new workspace root.
 
-2. Load it in Node/TS or any script to inspect the project structure. Example Node snippet:
+2. Load them in Node/TS or any script to inspect the project structure. Example Node snippet:
 
 ```js
 const fs = require('fs');
@@ -19,10 +21,13 @@ const index = JSON.parse(fs.readFileSync(path.join(__dirname, 'project-index.jso
 console.log(JSON.stringify(index, null, 2));
 ```
 
-3. Use the file to quickly locate files or to seed tooling that needs a project map.
+3. Use the compact index for quick file-to-purpose mapping and the full index for a structural snapshot.
 
 Notes
 
-- This snapshot reflects the structure as scanned on Aug 25, 2025 during an indexing operation.
+- This snapshot reflects the structure as scanned on Aug 29, 2025.
 - It does not contain file contents, only the tree and key filenames.
-- If you change the repo layout, re-run the index scan in the original environment or update the JSON by hand.
+- If you change the repo layout, update the JSON files by re-running the index generation or editing by hand.
+
+If you want, I can regenerate the index from the current workspace and include exact file lists per-folder (this requires running a local script).
+````

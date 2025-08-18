@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+//  IMPORTANT: the `action` function MUST return its result (`res`)
+//  IMPORTANT: the `action` function MUST return its result (`res`)
+//  IMPORTANT: the `action` function MUST return its result (`res`)
+
 import { toast } from "sonner";
 import { useGlobalState } from "@/contexts/GlobalStateContext";
 
@@ -41,12 +46,17 @@ export function useTryCatch() {
         ) as string | undefined;
 
         try {
-            const res = await action();
+            const res = await action(); // IMPORTANT: action MUST return res
 
             console.log(res, "response in try block");
 
-            if (res?.success || res?.data?.success || res?.data?.data?.success) {
-                if (successMessage) toast.success(successMessage, { id: toastId });
+            if (
+                res?.success ||
+                res?.data?.success ||
+                res?.data?.data?.success
+            ) {
+                if (successMessage)
+                    toast.success(successMessage, { id: toastId });
 
                 if (successAction) await successAction();
 
@@ -57,7 +67,9 @@ export function useTryCatch() {
             ) {
                 console.log(res, "error response in else if block of tryCatch");
 
-                setErrorMsg(res?.message || res?.error?.data?.message || "Unknown error");
+                setErrorMsg(
+                    res?.message || res?.error?.data?.message || "Unknown error"
+                );
 
                 if (res?.error?.data?.errorDetails) {
                     setErrorDetails(res?.error?.data?.errorDetails);
@@ -70,14 +82,25 @@ export function useTryCatch() {
                 toast.error("Something went wrong", { id: toastId });
 
             return res;
-        } catch (err: unknown) {
+        } catch (err: any) {
             console.error(err, "error in catch block");
-            
-            const errorMessage = err instanceof Error ? err.message : "Something went wrong";
+
+            if (err.success === false && err.message) {
+                setErrorMsg(err.message);
+                toast.error(err.message, { id: toastId });
+                return;
+            }
+
+            const errorMessage =
+                err instanceof Error ? err.message : "Something went wrong";
             setErrorMsg(errorMessage);
 
-            const isAppError = err && typeof err === 'object' && 'type' in err && err.type === "AppError";
-            
+            const isAppError =
+                err &&
+                typeof err === "object" &&
+                "type" in err &&
+                err.type === "AppError";
+
             if (isAppError && err instanceof Error) {
                 toast.error(err.message, { id: toastId });
             } else {
@@ -89,7 +112,6 @@ export function useTryCatch() {
     return tryCatch;
 }
 
-// Standalone version for use outside components (with global state actions)
 export const tryCatch = async (
     action: () => Promise<ApiResponse>,
     loadingMessage?: string,
@@ -106,7 +128,7 @@ export const tryCatch = async (
     ) as string | undefined;
 
     try {
-        const res = await action();
+        const res = await action(); // IMPORTANT: action MUST return res
 
         console.log(res, "response in try block");
 
@@ -122,7 +144,9 @@ export const tryCatch = async (
         ) {
             console.log(res, "error response in else if block of tryCatch");
 
-            globalActions?.setErrorMsg(res?.message || res?.error?.data?.message || "Unknown error");
+            globalActions?.setErrorMsg(
+                res?.message || res?.error?.data?.message || "Unknown error"
+            );
 
             if (res?.error?.data?.errorDetails) {
                 globalActions?.setErrorDetails(res?.error?.data?.errorDetails);
@@ -135,14 +159,23 @@ export const tryCatch = async (
             toast.error("Something went wrong", { id: toastId });
 
         return res;
-    } catch (err: unknown) {
+    } catch (err: any) {
         console.error(err, "error in catch block");
-        
-        const errorMessage = err instanceof Error ? err.message : "Something went wrong";
+
+        if (err.success === false && err.message) {
+            toast.error(err.message, { id: toastId });
+            return;
+        }
+        const errorMessage =
+            err instanceof Error ? err.message : "Something went wrong";
         globalActions?.setErrorMsg(errorMessage);
 
-        const isAppError = err && typeof err === 'object' && 'type' in err && err.type === "AppError";
-        
+        const isAppError =
+            err &&
+            typeof err === "object" &&
+            "type" in err &&
+            err.type === "AppError";
+
         if (isAppError && err instanceof Error) {
             toast.error(err.message, { id: toastId });
         } else {

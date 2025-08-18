@@ -1,7 +1,5 @@
 import { 
     TSeat, 
-    SeatCreateInput, 
-    SeatUpdateInput,
     SeatBulkCreateInput 
 } from "@/types/Seat";
 import { QO, MO, TObj } from "@/types/Query";
@@ -16,42 +14,32 @@ const seatsApi = createResourceApi<TSeat>({
     url: "/seats",
 });
 
-// Helper function to convert params array to object
-const convertParamsToObject = (params?: TQueryParam[]) => {
-    if (!params) return {};
-    return params.reduce((acc, param) => {
-        acc[param.name] = param.value;
-        return acc;
-    }, {} as Record<string, any>);
-};
+
 
 /* React Query hooks for UI components */
-export const useGetSeats = (params?: TQueryParam[] | TObj, options?: QO<TSeat>) => {
-    const queryParams = Array.isArray(params) 
-        ? convertParamsToObject(params) 
-        : params;
-    return seatsApi.useGetAll(queryParams, options);
+export const useGetSeats = (params?: TQueryParam[] | TObj, options?: QO<TSeat[]>) => {
+    return seatsApi.useGetAll(params, options);
 };
 
 export const useGetSeat = (id?: string, options?: QO<TSeat>) =>
     seatsApi.useGetById(id, options);
 
 export const useCreateSeat = (
-    options?: MO<TSeat, SeatCreateInput, unknown>
+    options?: MO<TSeat>
 ) => seatsApi.useCreateMutation(options);
 
 export const useUpdateSeat = (
-    options?: MO<TSeat, { id: string; data: SeatUpdateInput }, unknown>
+    options?: MO<TSeat>
 ) => seatsApi.useUpdateMutation(options);
 
-export const useDeleteSeat = (options?: MO<unknown, string, unknown>) =>
+export const useDeleteSeat = (options?: MO<unknown>) =>
     seatsApi.useDeleteMutation(options);
 
 // Get seats for a specific schedule
-export const useGetScheduleSeats = (scheduleId?: string, options?: QO<TSeat>) => {
+export const useGetScheduleSeats = (scheduleId?: string, options?: QO<TSeat[]>) => {
     return seatsApi.useGetAll(
         { scheduleId, sortBy: "seatNumber", sortOrder: "asc" },
-        {
+        options && {
             ...options,
             enabled: !!scheduleId && (options?.enabled !== false),
         }
@@ -59,10 +47,10 @@ export const useGetScheduleSeats = (scheduleId?: string, options?: QO<TSeat>) =>
 };
 
 // Get available seats for a schedule
-export const useGetAvailableSeats = (scheduleId?: string, options?: QO<TSeat>) => {
+export const useGetAvailableSeats = (scheduleId?: string, options?: QO<TSeat[]>) => {
     return seatsApi.useGetAll(
         { scheduleId, isBooked: false, sortBy: "seatNumber", sortOrder: "asc" },
-        {
+        options && {
             ...options,
             enabled: !!scheduleId && (options?.enabled !== false),
         }
@@ -118,11 +106,17 @@ export const useReleaseSeat = () => {
 };
 
 // Get seat map with availability for a schedule
-export const useGetSeatMapWithAvailability = (scheduleId?: string, options?: QO<any>) => {
-    return useMutation({
+export const useGetSeatMapWithAvailability = (scheduleId?: string) => {
+    return useMutation<{
+        seats: Array<{ id: string; seatNumber: string; isBooked: boolean }>;
+        summary?: { total: number; available: number };
+    }>({
         mutationFn: async () => {
             const response = await apiClient.get(`/seats/seat-map/${scheduleId}`);
-            return response.data;
+            return response as unknown as {
+                seats: Array<{ id: string; seatNumber: string; isBooked: boolean }>;
+                summary?: { total: number; available: number };
+            };
         },
     });
 };

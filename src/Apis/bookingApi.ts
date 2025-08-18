@@ -1,7 +1,5 @@
 import { 
     TBooking, 
-    BookingCreateInput, 
-    BookingUpdateInput,
     BookingSearchParams 
 } from "@/types/Booking";
 import { QO, MO, TObj } from "@/types/Query";
@@ -16,42 +14,33 @@ const bookingsApi = createResourceApi<TBooking>({
     url: "/bookings",
 });
 
-// Helper function to convert params array to object
-const convertParamsToObject = (params?: TQueryParam[]) => {
-    if (!params) return {};
-    return params.reduce((acc, param) => {
-        acc[param.name] = param.value;
-        return acc;
-    }, {} as Record<string, any>);
-};
+// apiBuilders already supports both Record and TQueryParam[]; no extra normalize needed
 
 /* React Query hooks for UI components */
-export const useGetBookings = (params?: TQueryParam[] | TObj, options?: QO<TBooking>) => {
-    const queryParams = Array.isArray(params) 
-        ? convertParamsToObject(params) 
-        : params;
-    return bookingsApi.useGetAll(queryParams, options);
+export const useGetBookings = (params?: TQueryParam[] | TObj, options?: QO<TBooking[]>) => {
+    return bookingsApi.useGetAll(params, options);
 };
 
 export const useGetBooking = (id?: string, options?: QO<TBooking>) =>
     bookingsApi.useGetById(id, options);
 
 export const useCreateBooking = (
-    options?: MO<TBooking, BookingCreateInput, unknown>
+    options?: MO<TBooking>
 ) => bookingsApi.useCreateMutation(options);
 
 export const useUpdateBooking = (
-    options?: MO<TBooking, { id: string; data: BookingUpdateInput }, unknown>
+    options?: MO<TBooking>
 ) => bookingsApi.useUpdateMutation(options);
 
-export const useDeleteBooking = (options?: MO<unknown, string, unknown>) =>
-    bookingsApi.useDeleteMutation(options);
+export const useDeleteBooking = (
+    options?: MO<unknown>
+) => bookingsApi.useDeleteMutation(options);
 
 // Get bookings for a specific user
-export const useGetUserBookings = (userId?: string, options?: QO<TBooking>) => {
+export const useGetUserBookings = (userId?: string, options?: QO<TBooking[]>) => {
     return bookingsApi.useGetAll(
         { userId, sortBy: "createdAt", sortOrder: "desc" },
-        {
+        options && {
             ...options,
             enabled: !!userId && (options?.enabled !== false),
         }
@@ -59,10 +48,10 @@ export const useGetUserBookings = (userId?: string, options?: QO<TBooking>) => {
 };
 
 // Get bookings for a specific schedule
-export const useGetScheduleBookings = (scheduleId?: string, options?: QO<TBooking>) => {
+export const useGetScheduleBookings = (scheduleId?: string, options?: QO<TBooking[]>) => {
     return bookingsApi.useGetAll(
         { scheduleId, sortBy: "createdAt", sortOrder: "asc" },
-        {
+        options && {
             ...options,
             enabled: !!scheduleId && (options?.enabled !== false),
         }
@@ -70,7 +59,7 @@ export const useGetScheduleBookings = (scheduleId?: string, options?: QO<TBookin
 };
 
 // Search bookings with filters
-export const useSearchBookings = (searchParams?: BookingSearchParams, options?: QO<TBooking>) => {
+export const useSearchBookings = (searchParams?: BookingSearchParams, options?: QO<TBooking[]>) => {
     return bookingsApi.useGetAll(
         {
             ...searchParams,

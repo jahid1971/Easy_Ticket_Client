@@ -183,7 +183,7 @@ const DataTable = ({
         <div>
             {(title || createButton) && (
                 <div className={`h-14 flex items-center justify-between mb-2 p-2 px-5 md:px-10 shadow-md absolute top-0 left-0 right-0 ${
-                    isDark ? 'bg-gray-800 border-b border-gray-700' : 'bg-slate-100'
+                    isDark ? 'bg-gray-800 border-b border-gray-700' : 'bg-background'
                 }`}>
                     <h5 className="text-lg font-semibold text-primary ">
                         {title}

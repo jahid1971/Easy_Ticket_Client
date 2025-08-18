@@ -85,3 +85,14 @@ alwaysApply: true
 ## Delivery
 
 -   Edit code directly in-place. Update all relevant files. Prefer minimal diffs. Keep exports named. Ensure responsive UI.
+
+
+
+
+- `auto-edit`
+  - Allowed: All auto edit is allowed. just be give me warning while changing utils or any destructive code.
+
+  - auto-edit:unrestricted — Full permission to modify anywhere in my codebase except git merge. 
+
+
+

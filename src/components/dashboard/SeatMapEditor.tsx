@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CustomSelect from "@/components/ui/C_Select";
 import { Plus, Minus, RotateCcw } from "lucide-react";
-import SeatMapPreviewModal from "./SeatMapPreviewModal";
+import SeatMapPreviewModal from "../modals/SeatMapPreviewModal";
 // Accept flexible seatMap shape (spaceAfterColumn can be string in form state)
 import { cn } from "@/lib/utils";
 

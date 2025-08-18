@@ -65,7 +65,7 @@ model BusStop {
 enum StopType {
     BOARDING
     DROPPING
-    BOTH
+    // BOTH
 }
 
 model RouteStop {
@@ -73,7 +73,7 @@ model RouteStop {
     routeId          String
     busStopId        String
     order            Int
-    stopType         StopType  @default(BOTH)
+    stopType         StopType  @default(BOARDING)
     route            Route     @relation(fields: [routeId], references: [id])
     busStop          BusStop   @relation(fields: [busStopId], references: [id])
     createdAt        DateTime  @default(now())

@@ -28,7 +28,7 @@ const BusesPage = () => {
 
     const handleDeleteBus = useCallback((id: string) => {
         if (confirm("Are you sure you want to delete this bus?")) {
-            deleteBusMutation.mutate(id);
+            deleteBusMutation.mutate(id); 
         }
     }, [deleteBusMutation]);
 

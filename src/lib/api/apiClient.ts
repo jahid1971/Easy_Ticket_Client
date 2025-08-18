@@ -32,6 +32,7 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
     function (response): unknown {
         // Always return the JSON body so callers don't have to access `.data`
+        console.log(response.data, "response in axios instance response");
         return response.data;
     },
 
@@ -76,7 +77,7 @@ instance.interceptors.response.use(
             " outside 401 handling, returning original error !"
         );
 
-        return Promise.reject(error);
+        return Promise.reject(error?.response?.data || error);
     }
 );
 

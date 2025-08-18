@@ -35,7 +35,7 @@ function HeroSearch() {
                         onValueChange={(v) => setMode(v as Mode)}
                     >
                         <div className="flex justify-center">
-                            <TabsList className="absolute left-1/2 -translate-1/2 lg:static lg:left-0 lg:-translate-0  w-fit bg-transparent lg:bg-white/60   rounded-b-none px-2 py-1  ">
+                            <TabsList className="absolute left-1/2 -translate-1/2 lg:static lg:left-0 lg:-translate-0  w-fit bg-transparent lg:bg-white/60 dark:bg-black/25   rounded-b-none px-2 py-1  ">
                                 <TabsTrigger
                                     value="bus"
                                     className="px-4 bg-background lg:bg-transparent "
@@ -67,7 +67,7 @@ function HeroSearch() {
                         </div>
 
                         {/* Card container */}
-                        <div className="mt-10 lg:mt-0 mx-auto w-full max-w-5xl rounded-xl border lg:border-0 border-gray-200/40 bg-white/60 p-4 sm:p-6 shadow-lg ">
+                        <div className="mt-10 lg:mt-0 mx-auto w-full max-w-5xl rounded-xl border lg:border-0 border-gray-200/40 bg-white/60 dark:bg-black/25 p-4 sm:p-6 shadow-lg ">
                             <TabsContent value="bus" className="mt-4 ">
                                 <SearchForm mode={mode} />
                             </TabsContent>
@@ -85,7 +85,7 @@ function HeroSearch() {
                                 {trending.map((t) => (
                                     <button
                                         key={t}
-                                        className="rounded-full border px-3 py-1 hover:bg-muted bg-white/50"
+                                        className="rounded-full border px-3 py-1 hover:bg-muted dark:bg-muted/40 bg-white/50"
                                         type="button"
                                     >
                                         {t}

@@ -4,10 +4,12 @@ import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { C_Input } from "@/components/ui/C_Input";
 import { Button } from "@/components/ui/button";
-import authService from "@/Apis/authApi";
+
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
+import { loginUser } from "@/Apis";
+import { tryCatch } from "@/utils/tryCatch";
 
 type FormValues = {
     email: string;
@@ -23,21 +25,23 @@ export default function LoginPage() {
     const router = useRouter();
 
     async function onSubmit(data: FormValues) {
-        try {
-            await authService.loginUser(data);
-            alert("Logged in");
-            router.push("/");
-        } catch (e: any) {
-            console.error(e);
-            alert(e?.response?.data?.message || "Login failed");
-        }
+ 
+        tryCatch(
+            () => loginUser(data),
+            "Logging in",
+            "Logged in successfully",
+            () => router.push("/")
+        );
     }
 
     function handleGoogleLogin() {
         // redirect to server OAuth endpoint; include redirect back to current page if needed
-        const redirect = typeof window !== "undefined" ? window.location.pathname : "";
+        const redirect =
+            typeof window !== "undefined" ? window.location.pathname : "";
         const base = "/api/v1/auth/google";
-        const url = redirect ? `${base}?redirect=${encodeURIComponent(redirect)}` : base;
+        const url = redirect
+            ? `${base}?redirect=${encodeURIComponent(redirect)}`
+            : base;
         window.location.href = url;
     }
 
@@ -51,7 +55,7 @@ export default function LoginPage() {
                     className="object-cover rounded-r-[200px]"
                     priority
                 />
-                
+
                 <div className="absolute  bottom-10 left-10 text-white ">
                     <h2 className="text-3xl font-bold">
                         Think Tickets, Think EasyTicket
@@ -78,6 +82,7 @@ export default function LoginPage() {
                                 type="email"
                                 control={control}
                                 required
+                                error={errors.email?.message}
                             />
                         </div>
 
@@ -89,6 +94,7 @@ export default function LoginPage() {
                                 type="password"
                                 control={control}
                                 required
+                                error={errors.password?.message}
                             />
                         </div>
 

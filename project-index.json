@@ -5,8 +5,11 @@
       ".gitignore",
       ".next/",
       "components.json",
+      "CONTEXT_MIGRATION.md",
       "eslint.config.mjs",
       "FRONTEND_REQUIREMENTS.md",
+      "FRONTEND_SCHEMA_UPDATE_SUMMARY.md",
+      "middleware.ts",
       "next-env.d.ts",
       "next.config.ts",
       "node_modules/",
@@ -16,8 +19,10 @@
       "public/",
       "README.md",
       "reference/",
+      "scripts/",
       "server/",
       "src/",
+      "schema.prisma",
       "tsconfig.json",
       "tsconfig.tsbuildinfo"
     ]
@@ -26,6 +31,7 @@
     "file.svg",
     "globe.svg",
     "Hero_background_image.png",
+    "loginBus.jpg",
     "next.svg",
     "vercel.svg",
     "window.svg"
@@ -46,28 +52,12 @@
       ],
       "src": {
         "middleware.ts": "file",
-        "app": {
-          "globals.css": "file",
-          "layout.tsx": "file",
-          "not-found.tsx": "file",
-          "withCommonLayout/": "dir",
-          "withDashboardLayout/": "dir",
-          "login/": "dir",
-          "register/": "dir",
-          "video/": "dir"
-        },
+        "app": "dir",
         "assets": "dir",
         "components": "dir",
         "constants": "dir",
-        "helpers": {
-          "axios": [
-            "axiosBaseQuery.ts",
-            "axiosInstance.ts"
-          ]
-        },
-        "hooks": [
-          "useUserInfo.ts"
-        ],
+        "helpers": "dir",
+        "hooks": "dir",
         "lib": "dir",
         "redux": "dir",
         "services": "dir",
@@ -100,33 +90,40 @@
         "package.json",
         "tsconfig.json"
       ],
-      "docs": [
-        "bus-seatmap.md",
-        "swagger.yaml",
-        "examples/"
-      ],
+      "docs": "dir",
       "prisma": [
         "schema.prisma",
         "migrations/"
       ],
-      "src": [
-        "app/",
-        "app.ts",
-        "prisma.ts",
-        "server.ts"
-      ]
+      "src": "dir"
     }
   },
   "src": {
+    "Apis": [
+      "authApi.ts",
+      "bookingApi.ts",
+      "busApi.ts",
+      "busRouteApi.ts",
+      "busStopApi.ts",
+      "index.ts",
+      "paymentApi.ts",
+      "routeStopApi.ts",
+      "scheduleApi.ts",
+      "seatApi.ts"
+    ],
     "app": [
       "favicon.ico",
       "globals.css",
-  "layout.tsx",
-  "page.tsx",
-  "login/",
-  "register/"
+      "layout.tsx",
+      "(auth)/",
+      "(defauldSite)/",
+      "(withDashboardLayout)/",
+      "dashboard/"
     ],
     "components": {
+      "app-sidebar.tsx": "file",
+      "dashboard": "dir",
+      "examples": "dir",
       "forms": [
         "SearchForm.tsx"
       ],
@@ -134,29 +131,45 @@
         "HeroSearch.tsx",
         "Steps.tsx"
       ],
+      "others": "dir",
+      "providers": "dir",
+      "shared": "dir",
       "ui": [
+        "badge.tsx",
         "button.tsx",
         "calendar.tsx",
+        "card.tsx",
         "command.tsx",
         "CustomDropdown.tsx",
         "C_Input.tsx",
+        "C_Select.tsx",
         "DatePicker.tsx",
         "dialog.tsx",
+        "dropdown-menu.tsx",
+        "form.tsx",
         "input.tsx",
         "label.tsx",
         "LocationCombobox.tsx",
         "Logo.tsx",
-        "Navbar.tsx",
         "popover.tsx",
-        "tabs.tsx"
+        "select.tsx",
+        "separator.tsx",
+        "sheet.tsx",
+        "sidebar.tsx",
+        "skeleton.tsx",
+        "table.tsx",
+        "tabs.tsx",
+        "textarea.tsx",
+        "theme-toggle.tsx",
+        "tooltip.tsx"
       ]
     },
-    "lib": [
-      "utils.ts"
-    ],
-    "services": [
-      "routeService.ts",
-      "authService.ts"
-    ]
+    "constants": "dir",
+    "contexts": "dir",
+    "helpers": "dir",
+    "hooks": "dir",
+    "lib": "dir",
+    "types": "dir",
+    "utils": "dir"
   }
 }

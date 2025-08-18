@@ -4,17 +4,16 @@ import { useEffect, useState } from "react";
 export function useAppSidebar() {
     const sidebar = useSidebar();
     const [isAnimating, setIsAnimating] = useState(false);
-    
+
     useEffect(() => {
-        // Add a short animation state when toggling
         setIsAnimating(true);
         const timer = setTimeout(() => {
             setIsAnimating(false);
-        }, 200); // Match the CSS transition duration
-        
+        }, 200);
+
         return () => clearTimeout(timer);
     }, [sidebar.state]);
-    
+
     return {
         ...sidebar,
         isAnimating,

@@ -1,7 +1,6 @@
 import { 
     TSchedule, 
     ScheduleCreateInput, 
-    ScheduleUpdateInput,
     ScheduleSearchParams 
 } from "@/types/Schedule";
 import { QO, MO, TObj } from "@/types/Query";
@@ -16,39 +15,29 @@ const schedulesApi = createResourceApi<TSchedule>({
     url: "/schedules",
 });
 
-// Helper function to convert params array to object
-const convertParamsToObject = (params?: TQueryParam[]) => {
-    if (!params) return {};
-    return params.reduce((acc, param) => {
-        acc[param.name] = param.value;
-        return acc;
-    }, {} as Record<string, any>);
-};
+
 
 /* React Query hooks for UI components */
-export const useGetSchedules = (params?: TQueryParam[] | TObj, options?: QO<TSchedule>) => {
-    const queryParams = Array.isArray(params) 
-        ? convertParamsToObject(params) 
-        : params;
-    return schedulesApi.useGetAll(queryParams, options);
+export const useGetSchedules = (params?: TQueryParam[] | TObj, options?: QO<TSchedule[]>) => {
+    return schedulesApi.useGetAll(params, options);
 };
 
 export const useGetSchedule = (id?: string, options?: QO<TSchedule>) =>
     schedulesApi.useGetById(id, options);
 
 export const useCreateSchedule = (
-    options?: MO<TSchedule, ScheduleCreateInput, unknown>
+    options?: MO<TSchedule>
 ) => schedulesApi.useCreateMutation(options);
 
 export const useUpdateSchedule = (
-    options?: MO<TSchedule, { id: string; data: ScheduleUpdateInput }, unknown>
+    options?: MO<TSchedule>
 ) => schedulesApi.useUpdateMutation(options);
 
-export const useDeleteSchedule = (options?: MO<unknown, string, unknown>) =>
+export const useDeleteSchedule = (options?: MO<unknown>) =>
     schedulesApi.useDeleteMutation(options);
 
 // Search schedules for booking
-export const useSearchSchedules = (searchParams?: ScheduleSearchParams, options?: QO<TSchedule>) => {
+export const useSearchSchedules = (searchParams?: ScheduleSearchParams, options?: QO<TSchedule[]>) => {
     return schedulesApi.useGetAll(
         {
             ...searchParams,
@@ -60,10 +49,10 @@ export const useSearchSchedules = (searchParams?: ScheduleSearchParams, options?
 };
 
 // Get schedules for a specific route
-export const useGetSchedulesByRoute = (routeId?: string, options?: QO<TSchedule>) => {
+export const useGetSchedulesByRoute = (routeId?: string, options?: QO<TSchedule[]>) => {
     return schedulesApi.useGetAll(
         { routeId, sortBy: "date,departureTime", sortOrder: "asc" },
-        {
+        options && {
             ...options,
             enabled: !!routeId && (options?.enabled !== false),
         }
@@ -71,10 +60,10 @@ export const useGetSchedulesByRoute = (routeId?: string, options?: QO<TSchedule>
 };
 
 // Get schedules for a specific bus
-export const useGetSchedulesByBus = (busId?: string, options?: QO<TSchedule>) => {
+export const useGetSchedulesByBus = (busId?: string, options?: QO<TSchedule[]>) => {
     return schedulesApi.useGetAll(
         { busId, sortBy: "date,departureTime", sortOrder: "asc" },
-        {
+        options && {
             ...options,
             enabled: !!busId && (options?.enabled !== false),
         }
@@ -82,7 +71,7 @@ export const useGetSchedulesByBus = (busId?: string, options?: QO<TSchedule>) =>
 };
 
 // Get available schedules (with seat availability)
-export const useGetAvailableSchedules = (searchParams?: ScheduleSearchParams, options?: QO<TSchedule>) => {
+export const useGetAvailableSchedules = (searchParams?: ScheduleSearchParams, options?: QO<TSchedule[]>) => {
     return schedulesApi.useGetAll(
         {
             ...searchParams,

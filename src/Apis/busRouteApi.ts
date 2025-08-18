@@ -2,7 +2,7 @@ import { TRoute } from "@/types/Route";
 import { QO, MO, TObj } from "@/types/Query";
 import { TQueryParam } from "@/types/general.types";
 import { createResourceApi } from "@/lib";
-import { UseQueryOptions } from "@tanstack/react-query";
+// no extra react-query imports needed here
 
 // Configure unified API for routes
 const busRoutesApi = createResourceApi<TRoute>({
@@ -10,33 +10,23 @@ const busRoutesApi = createResourceApi<TRoute>({
     url: "/routes",
 });
 
-// Helper function to convert params array to object
-const convertParamsToObject = (params?: TQueryParam[]) => {
-    if (!params) return {};
-    return params.reduce((acc, param) => {
-        acc[param.name] = param.value;
-        return acc;
-    }, {} as Record<string, any>);
-};
+
 
 /* React Query hooks for UI components */
-export const useGetBusRoutes = (params?: TQueryParam[] | TObj, options?: QO<TRoute>) => {
-    const queryParams = Array.isArray(params) 
-        ? convertParamsToObject(params) 
-        : params;
-    return busRoutesApi.useGetAll(queryParams, options);
+export const useGetBusRoutes = (params?: TQueryParam[] | TObj, options?: QO<TRoute[]>) => {
+    return busRoutesApi.useGetAll(params, options);
 };
 
 export const useGetBusRoute = (id?: string, options?: QO<TRoute>) =>
     busRoutesApi.useGetById(id, options);
 
 export const useCreateBusRoute = (
-    options?: MO<TRoute, Partial<TRoute>, unknown>
+    options?: MO<TRoute>
 ) => busRoutesApi.useCreateMutation(options);
 
 export const useUpdateBusRoute = (
-    options?: MO<TRoute, { id: string; data: Partial<TRoute> }, unknown>
+    options?: MO<TRoute>
 ) => busRoutesApi.useUpdateMutation(options);
 
-export const useDeleteBusRoute = (options?: MO<unknown, string, unknown>) =>
+export const useDeleteBusRoute = (options?: MO<unknown>) =>
     busRoutesApi.useDeleteMutation(options);

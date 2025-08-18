@@ -1,20 +1,20 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { C_Input } from "@/components/ui/C_Input";
 import { useCreateBusStop, useUpdateBusStop } from "@/Apis/busStopApi";
-import { BusStopCreateInput, TBusStop } from "@/types/BusStop";
+import { TBusStop } from "@/types/BusStop";
 import tryCatch from "@/utils/tryCatch";
 
 const busStopSchema = z.object({
     name: z.string().min(1, "Bus stop name is required"),
     address: z.string().optional(),
     city: z.string().optional(),
-    latitude: z.number().optional(),
-    longitude: z.number().optional(),
+    latitude: z.string().optional(),
+    longitude: z.string().optional(),
 });
 
 type BusStopFormData = z.infer<typeof busStopSchema>;
@@ -29,7 +29,7 @@ const CreateBusStopForm: React.FC<CreateBusStopFormProps> = ({
     onSuccess,
 }) => {
     const isEditing = !!busStop;
-    
+
     const {
         control,
         handleSubmit,
@@ -41,8 +41,8 @@ const CreateBusStopForm: React.FC<CreateBusStopFormProps> = ({
             name: busStop?.name || "",
             address: busStop?.address || "",
             city: busStop?.city || "",
-            latitude: busStop?.latitude || undefined,
-            longitude: busStop?.longitude || undefined,
+            latitude: busStop?.latitude?.toString() || "",
+            longitude: busStop?.longitude?.toString() || "",
         },
     });
 
@@ -50,33 +50,46 @@ const CreateBusStopForm: React.FC<CreateBusStopFormProps> = ({
     const updateBusStopMutation = useUpdateBusStop();
 
     const onSubmit = async (data: BusStopFormData) => {
+        const latitude =
+            data.latitude && data.latitude.trim() !== ""
+                ? parseFloat(data.latitude)
+                : undefined;
+        const longitude =
+            data.longitude && data.longitude.trim() !== ""
+                ? parseFloat(data.longitude)
+                : undefined;
+
         await tryCatch(
             async () => {
                 if (isEditing) {
-                    await updateBusStopMutation.mutateAsync({
+                    return await updateBusStopMutation.mutateAsync({
                         id: busStop.id,
                         data: {
                             name: data.name,
                             address: data.address || undefined,
                             city: data.city || undefined,
-                            latitude: data.latitude,
-                            longitude: data.longitude,
+                            latitude,
+                            longitude,
                         },
                     });
                 } else {
-                    await createBusStopMutation.mutateAsync({
+                    return await createBusStopMutation.mutateAsync({
                         name: data.name,
                         address: data.address || undefined,
                         city: data.city || undefined,
-                        latitude: data.latitude,
-                        longitude: data.longitude,
+                        latitude,
+                        longitude,
                     });
-                    reset();
                 }
-                onSuccess?.();
             },
             isEditing ? "Updating bus stop" : "Creating bus stop",
-            isEditing ? "Bus stop updated successfully!" : "Bus stop created successfully!"
+            isEditing
+                ? "Bus stop updated successfully!"
+                : "Bus stop created successfully!",
+            () => {
+                reset();
+                onSuccess?.();
+            }
         );
     };
 
@@ -130,13 +143,22 @@ const CreateBusStopForm: React.FC<CreateBusStopFormProps> = ({
             <div className="flex gap-3 pt-4">
                 <Button
                     type="submit"
-                    disabled={isSubmitting || createBusStopMutation.isPending || updateBusStopMutation.isPending}
+                    disabled={
+                        isSubmitting ||
+                        createBusStopMutation.isPending ||
+                        updateBusStopMutation.isPending
+                    }
                     className="flex-1"
                 >
-                    {isSubmitting || createBusStopMutation.isPending || updateBusStopMutation.isPending
-                        ? isEditing ? "Updating..." : "Creating..."
-                        : isEditing ? "Update Bus Stop" : "Create Bus Stop"
-                    }
+                    {isSubmitting ||
+                    createBusStopMutation.isPending ||
+                    updateBusStopMutation.isPending
+                        ? isEditing
+                            ? "Updating..."
+                            : "Creating..."
+                        : isEditing
+                        ? "Update Bus Stop"
+                        : "Create Bus Stop"}
                 </Button>
             </div>
         </form>

@@ -1,7 +1,6 @@
 import { 
     TPayment, 
-    PaymentCreateInput, 
-    PaymentUpdateInput 
+    PaymentCreateInput
 } from "@/types/Payment";
 import { QO, MO, TObj } from "@/types/Query";
 import { TQueryParam } from "@/types/general.types";
@@ -15,42 +14,32 @@ const paymentsApi = createResourceApi<TPayment>({
     url: "/payments",
 });
 
-// Helper function to convert params array to object
-const convertParamsToObject = (params?: TQueryParam[]) => {
-    if (!params) return {};
-    return params.reduce((acc, param) => {
-        acc[param.name] = param.value;
-        return acc;
-    }, {} as Record<string, any>);
-};
+
 
 /* React Query hooks for UI components */
-export const useGetPayments = (params?: TQueryParam[] | TObj, options?: QO<TPayment>) => {
-    const queryParams = Array.isArray(params) 
-        ? convertParamsToObject(params) 
-        : params;
-    return paymentsApi.useGetAll(queryParams, options);
+export const useGetPayments = (params?: TQueryParam[] | TObj, options?: QO<TPayment[]>) => {
+    return paymentsApi.useGetAll(params, options);
 };
 
 export const useGetPayment = (id?: string, options?: QO<TPayment>) =>
     paymentsApi.useGetById(id, options);
 
 export const useCreatePayment = (
-    options?: MO<TPayment, PaymentCreateInput, unknown>
+    options?: MO<TPayment>
 ) => paymentsApi.useCreateMutation(options);
 
 export const useUpdatePayment = (
-    options?: MO<TPayment, { id: string; data: PaymentUpdateInput }, unknown>
+    options?: MO<TPayment>
 ) => paymentsApi.useUpdateMutation(options);
 
-export const useDeletePayment = (options?: MO<unknown, string, unknown>) =>
+export const useDeletePayment = (options?: MO<unknown>) =>
     paymentsApi.useDeleteMutation(options);
 
 // Get payments for a specific user
-export const useGetUserPayments = (userId?: string, options?: QO<TPayment>) => {
+export const useGetUserPayments = (userId?: string, options?: QO<TPayment[]>) => {
     return paymentsApi.useGetAll(
         { userId, sortBy: "createdAt", sortOrder: "desc" },
-        {
+        options && {
             ...options,
             enabled: !!userId && (options?.enabled !== false),
         }
