@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -38,15 +38,18 @@ const BusStopsPage = () => {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editingBusStop, setEditingBusStop] = useState<TBusStop | null>(null);
 
+    // Memoize query parameters to prevent infinite re-renders
+    const queryParams = useMemo(() => ({
+        searchTerm,
+        sortBy: "name",
+        sortOrder: "asc",
+    }), [searchTerm]);
+
     const {
         data: busStopsData,
         isLoading,
         refetch,
-    } = useGetBusStops({
-        searchTerm,
-        sortBy: "name",
-        sortOrder: "asc",
-    });
+    } = useGetBusStops(queryParams);
 
     console.log(busStopsData, "busStopsData -------------------------------");
 
@@ -300,22 +303,14 @@ const BusStopsPage = () => {
             </div>
 
             {/* modals -------------- */}
-            <ConfirmDeleteModal
-                open={deleteModalOpen}
-                onOpenChange={(open) => {
-                    setDeleteModalOpen(open);
-                    if (!open) setToDelete(null);
-                }}
-                title="Delete bus stop"
-                description={
-                    toDelete
-                        ? `Are you sure you want to delete "${toDelete.name}"? This action cannot be undone.`
-                        : undefined
-                }
-                confirmLabel="Delete"
-                loading={deleteBusStopMutation.isPending}
-                onConfirm={handleDelete}
-            />
+            {toDelete && (
+                <ConfirmDeleteModal
+                    title={`Delete bus stop`}
+                    handleDelete={handleDelete}
+                    open={deleteModalOpen}
+                    onOpenChange={setDeleteModalOpen}
+                />
+            )}
             <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>

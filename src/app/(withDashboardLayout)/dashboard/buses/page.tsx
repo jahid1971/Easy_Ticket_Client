@@ -8,17 +8,22 @@ import { TBus } from "@/types/Bus";
 import { TQueryParam } from "@/types/general.types";
 import { defaultParams } from "@/constants/common";
 import { busColumnDefs, IBusRow } from "./ColumnDefs";
+import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
 import DataTable from "@/components/dashboard/table/DataTable";
 import Link from "next/link";
+import { useIsMobile } from "@/hooks";
 
 const BusesPage = () => {
     const [params, setParams] = useState<TQueryParam[]>(defaultParams);
     const [deleteIds, setDeleteIds] = useState<string[]>([]);
     const selectedRowsRef = useRef<IBusRow[]>([]);
+    const [open, setOpen] = useState(false);
 
     const { data: busesData, isFetching } = useGetBuses(params);
-    const deleteBusMutation = useDeleteBus();
+    const { mutate: deleteBus, mutateAsync: deleteBusAsync } = useDeleteBus();
+ 
 
+    const isMobile = useIsMobile();
     const buses = useMemo(() => {
         return busesData?.data?.map((bus: TBus) => ({
             ...bus,
@@ -26,13 +31,18 @@ const BusesPage = () => {
         })) || [];
     }, [busesData?.data]);
 
-    const handleDeleteBus = useCallback((id: string) => {
-        if (confirm("Are you sure you want to delete this bus?")) {
-            deleteBusMutation.mutate(id); 
-        }
-    }, [deleteBusMutation]);
+    const handleDeleteBus = useCallback(async (id: string) => {
+        await deleteBusAsync(id);
+        setOpen(false);
+        setDeleteIds([]);
+    }, [deleteBusAsync]);
 
-    const columnDefs = useMemo(() => busColumnDefs(handleDeleteBus), [handleDeleteBus]);
+    const handleModalOpen = (id: string) => {
+        setOpen(true);
+        setDeleteIds([id]);
+    };
+
+    const columnDefs = useMemo(() => busColumnDefs(handleModalOpen), [handleModalOpen]);
 
     const handleSelectedRows = useCallback((rows: any) => {
         selectedRowsRef.current = rows;
@@ -63,6 +73,12 @@ const BusesPage = () => {
 
     return (
         <div>
+            <ConfirmDeleteModal
+                title="Are you sure you want to delete this bus?"
+                handleDelete={() => handleDeleteBus(deleteIds[0])}
+                open={open}
+                onOpenChange={setOpen}
+            />
             <DataTable
                 title="BUSES"
                 searchField
@@ -75,7 +91,8 @@ const BusesPage = () => {
                 createButton={createButton}
                 checkedRowsActionBtn={checkedRowsActionBtn}
                 metaData={busesData?.meta}
-                minWidth={1200}
+                minWidth={1000}
+                selectable={isMobile ? false : true}
             />
         </div>
     );

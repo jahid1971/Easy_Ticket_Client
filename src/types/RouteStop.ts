@@ -1,9 +1,8 @@
-import type { TRoute } from './Route';
-import type { TBusStop } from './BusStop';
-import { TBooking } from './Booking';
+import type { TRoute } from "./Route";
+import type { TBusStop } from "./BusStop";
+import { TBooking } from "./Booking";
 
-
-export type StopType = "BOARDING" | "DROPPING" | "BOTH";
+export type StopType = "BOARDING" | "DROPPING";
 
 export type TRouteStop = {
     id: string;

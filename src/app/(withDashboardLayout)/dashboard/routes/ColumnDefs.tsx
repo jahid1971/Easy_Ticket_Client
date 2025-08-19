@@ -1,49 +1,105 @@
+"use client";
+
 import { ICellRendererParams } from "@ag-grid-community/core";
-import { MoreHorizontal, Edit, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { TRoute } from "@/types/Route";
+import ActionCell from "@/components/dashboard/table/ActionCell";
+import { ResponsiveColDef } from "@/utils/responsiveColumns";
+import React from "react";
 
 export interface IRouteRow extends TRoute {
     routeData: TRoute;
 }
 
-export const routeColumnDefs = (handleDeleteRoute: (id: string) => void) => [
-    {
-        headerCheckboxSelection: true,
-        checkboxSelection: true,
-        maxWidth: 50,
-    },
+export const routeColumnDefs = (
+    handleOpen: (id: string) => void
+): ResponsiveColDef[] => [
     {
         headerName: "Route Name",
         field: "routeName",
-        minWidth: 200,
+        priority: "essential",
+        minWidth: 180,
+        flex: 2,
         cellRenderer: (params: ICellRendererParams<IRouteRow>) => {
             const route = params.data;
-            return route?.routeName || `${route?.source} - ${route?.destination}`;
+            const routeName =
+                route?.routeName || `${route?.source} - ${route?.destination}`;
+            return (
+                <div className="w-full py-2">
+                    <div className="font-semibold text-base leading-tight mb-2">
+                        {routeName}
+                    </div>
+                    {/* Show comprehensive info on mobile in a card-like layout */}
+                    <div className="md:hidden space-y-3">
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span className="font-medium text-muted-foreground block">
+                                    Source:
+                                </span>
+                                <span className="text-foreground">
+                                    {route?.source}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="font-medium text-muted-foreground block">
+                                    Destination:
+                                </span>
+                                <span className="text-foreground">
+                                    {route?.destination}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="text-sm">
+                                <span className="font-medium text-muted-foreground">
+                                    Distance:{" "}
+                                </span>
+                                <span className="text-foreground">
+                                    {route?.distance} km
+                                </span>
+                            </div>
+                            <Badge
+                                variant={
+                                    route?.status === "ACTIVE"
+                                        ? "default"
+                                        : "secondary"
+                                }
+                                className={`${
+                                    route?.status === "ACTIVE"
+                                        ? "bg-green-100 text-green-800 hover:bg-green-100"
+                                        : ""
+                                }`}
+                            >
+                                {route?.status}
+                            </Badge>
+                        </div>
+                    </div>
+                </div>
+            );
         },
     },
     {
         headerName: "Source",
         field: "source",
-        minWidth: 150,
+        priority: "high",
+        minWidth: 120,
+        hideOnMobile: true,
     },
     {
-        headerName: "Destination", 
+        headerName: "Destination",
         field: "destination",
-        minWidth: 150,
+        priority: "high",
+        minWidth: 120,
+        hideOnMobile: true,
     },
     {
         headerName: "Distance",
         field: "distance",
-        maxWidth: 120,
+        priority: "medium",
+        maxWidth: 100,
+        hideOnMobile: true,
         cellRenderer: (params: ICellRendererParams<IRouteRow>) => {
             return `${params.data?.distance} km`;
         },
@@ -51,7 +107,9 @@ export const routeColumnDefs = (handleDeleteRoute: (id: string) => void) => [
     {
         headerName: "Status",
         field: "status",
-        maxWidth: 120,
+        priority: "high",
+        maxWidth: 100,
+        hideOnMobile: true,
         cellRenderer: (params: ICellRendererParams<IRouteRow>) => {
             const status = params.data?.status;
             return (
@@ -70,31 +128,40 @@ export const routeColumnDefs = (handleDeleteRoute: (id: string) => void) => [
     },
     {
         headerName: "Actions",
-        cellStyle: { display: "flex", alignItems: "center", justifyContent: "center" },
-        maxWidth: 120,
-        cellRenderer: (params: ICellRendererParams<IRouteRow>) => (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem asChild>
-                        <Link href={`/dashboard/routes/${params.data?.id}/edit`}>
+        field: "actions",
+        priority: "essential",
+        cellStyle: {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+        },
+        maxWidth: 80,
+        minWidth: 80,
+        width: 80,
+        sortable: false,
+        filter: false,
+        cellRenderer: (params: ICellRendererParams<IRouteRow>) => {
+            if (!params.data?.id) return null;
+            const actions = [
+                {
+                    label: "Edit",
+                    icon: <Edit className="h-4 w-4" />,
+                    asChild: true,
+                    children: (
+                        <Link href={`/dashboard/routes/${params.data.id}/edit`}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                         </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => handleDeleteRoute(params.data?.id ?? "")}
-                        className="text-destructive"
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        ),
+                    ),
+                },
+                {
+                    label: "Delete",
+                    icon: <Trash2 className="h-4 w-4" />,
+                    onClick: () => handleOpen(params.data?.id || ""),
+                    variant: "destructive" as const,
+                },
+            ];
+            return <ActionCell id={params.data.id} actions={actions} />;
+        },
     },
 ];

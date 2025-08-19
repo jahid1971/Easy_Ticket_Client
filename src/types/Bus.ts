@@ -27,7 +27,7 @@ export type TBus = {
     schedules?: TSchedule[];
 };
 
-export interface BusCreateInput {
+export type TBusCreateInput= {
     name: string;
     operator: string;
     registrationNumber: string;

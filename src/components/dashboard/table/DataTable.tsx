@@ -1,9 +1,11 @@
+"use client";
 import React, {
     useCallback,
     useEffect,
     useMemo,
     useRef,
     useState,
+    memo,
 } from "react";
 import { AgGridReact } from "@ag-grid-community/react"; // React Grid Logic
 import "@ag-grid-community/styles/ag-grid.css"; // Core CSS
@@ -23,6 +25,14 @@ import styles from "./table.module.css";
 import { CustomPagination } from "../../others/Pagination";
 import tableSerial from "@/utils/tableSerial";
 import { useTheme } from "@/hooks/use-theme";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+    ResponsiveColDef,
+    getResponsiveColumns,
+    applyResponsiveSizing,
+    createResponsiveDefaultColDef,
+} from "@/utils/responsiveColumns";
+import { useIsSmallScreen } from "@/utils/isSmallScreen";
 
 ModuleRegistry.registerModules([ClientSideRowModelModule]);
 
@@ -42,9 +52,10 @@ const DataTable = ({
     metaData,
     serial = true,
     minWidth = 700,
+    selectable = true,
 }: {
     rowData: any[];
-    columnDefs: ColDef[];
+    columnDefs: ResponsiveColDef[];
     isFetching: boolean;
     handleSelectedRows?: any;
     searchField?: boolean;
@@ -58,25 +69,41 @@ const DataTable = ({
     metaData?: any;
     serial?: boolean;
     minWidth?: number;
+    selectable?: boolean;
 }) => {
     const gridRef = useRef<AgGridReact>(null);
     const [showFilters, setShowFilters] = useState(false);
     const [selectedRows, setSelectedRows] = useState<any[]>([]);
     const { isDark } = useTheme();
+    // Prefer the centralized, tested hook from `src/hooks/use-mobile.ts`
+    // it handles SSR defaults and uses matchMedia correctly.
+    const isMobile = useIsMobile();
 
     const defaultColDef = useMemo(() => {
-        return {
-            flex: 1,
-        };
-    }, []);
+        return createResponsiveDefaultColDef(isMobile);
+    }, [isMobile]);
 
     const processedColumnDefs = useMemo(() => {
+        if (
+            !columnDefs ||
+            !Array.isArray(columnDefs) ||
+            columnDefs.length === 0
+        ) {
+            return [];
+        }
+
+        let columns = [...columnDefs];
+
+        // Add serial number column if needed
         if (serial && params) {
-            const slColumn = {
+            const slColumn: ResponsiveColDef = {
                 headerName: "SL",
                 headerClass: "sl-header",
                 field: "sl",
-                maxWidth: 60,
+                priority: "essential",
+                maxWidth: isMobile ? 40 : 50,
+                minWidth: isMobile ? 40 : 50,
+                width: isMobile ? 40 : 50,
                 cellStyle: {
                     display: "flex",
                     alignItems: "center",
@@ -84,18 +111,46 @@ const DataTable = ({
                 },
                 sortable: false,
             };
-            
-            return [
-                columnDefs[0],
-                slColumn,
-                ...columnDefs.slice(1),
-            ];
+
+            columns = [slColumn, ...columns];
         }
-        return columnDefs;
-    }, [serial, params, columnDefs]);
+
+        const hasCheckboxColumn = columns.some(
+            (c: any) => c?.checkboxSelection || c?.headerCheckboxSelection
+        );
+
+        if (selectable && !hasCheckboxColumn ) {
+            const checkboxCol: ResponsiveColDef = {
+                headerCheckboxSelection: true,
+                checkboxSelection: true,
+                headerClass: "no-divider",
+                priority: "essential",
+                maxWidth: 45,
+                minWidth: 45,
+                width: 45,
+                field: "__select__",
+                pinned: "left",
+            } as any;
+
+            columns = [checkboxCol, ...columns];
+        }
+
+        // Apply responsive filtering
+        const responsiveColumns = getResponsiveColumns(columns, isMobile);
+
+        // Apply responsive sizing and remove any null/undefined entries that
+        // could cause ag-grid internals to attempt to read properties on null.
+        return applyResponsiveSizing(responsiveColumns, isMobile).filter(
+            Boolean
+        ) as ResponsiveColDef[];
+    }, [serial, params, columnDefs, isMobile]);
 
     const processedRowData = useMemo(() => {
-        if (serial && params && rowData) {
+        if (!rowData || !Array.isArray(rowData)) {
+            return [];
+        }
+
+        if (serial && params) {
             return rowData.map((item: any, index: number) => ({
                 ...item,
                 sl: tableSerial(params, index),
@@ -107,11 +162,19 @@ const DataTable = ({
 
     useEffect(() => {
         setTimeout(() => {
-            if (isFetching && gridRef.current?.api)
-                gridRef.current.api.showLoadingOverlay();
-            else if (!isFetching && !rowData?.length && gridRef.current?.api)
+            if (isFetching && gridRef.current?.api) {
+                gridRef.current.api.setGridOption("loading", true);
+            } else if (
+                !isFetching &&
+                !rowData?.length &&
+                gridRef.current?.api
+            ) {
+                gridRef.current.api.setGridOption("loading", false);
                 gridRef.current.api.showNoRowsOverlay();
-            else if (gridRef.current?.api) gridRef.current.api.hideOverlay();
+            } else if (gridRef.current?.api) {
+                gridRef.current.api.setGridOption("loading", false);
+                gridRef.current.api.hideOverlay();
+            }
         });
     }, [isFetching, rowData?.length]);
 
@@ -181,58 +244,51 @@ const DataTable = ({
 
     return (
         <div>
-            {(title || createButton) && (
-                <div className={`h-14 flex items-center justify-between mb-2 p-2 px-5 md:px-10 shadow-md absolute top-0 left-0 right-0 ${
-                    isDark ? 'bg-gray-800 border-b border-gray-700' : 'bg-background'
-                }`}>
-                    <h5 className="text-lg font-semibold text-primary ">
-                        {title}
-                    </h5>
-                   <div className="mr-10"> {createButton}</div>
-                </div>
+            {title && (
+                <h5 className="text-lg font-semibold text-primary absolute top-3  right-[450px] ">
+                    {title}
+                </h5>
             )}
 
-            <div
-                className={`flex items-center  gap-2 flex-wrap ${
-                    (title || createButton) && `mt-7`
-                }`}
-            >
-                {searchField && params && setParams && (
-                    <SearchInput params={params} setParams={setParams} />
-                )}
-                {filterable && (
-                    <Button
-                        className=""
-                        variant={showFilters ? "default" : "outline"}
-                        onClick={() => setShowFilters(!showFilters)}
-                        size={"sm"}
+            <div className="flex items-center justify-between mt-7">
+                <div className={`flex items-center  gap-2 flex-wrap `}>
+                    {searchField && params && setParams && (
+                        <SearchInput params={params} setParams={setParams} />
+                    )}
+                    {filterable && (
+                        <Button
+                            className=""
+                            variant={showFilters ? "default" : "outline"}
+                            onClick={() => setShowFilters(!showFilters)}
+                            size={"sm"}
+                        >
+                            <RiFilterLine className=" mr-1" />
+                            Filter
+                        </Button>
+                    )}
+
+                    <span
+                        className={` transform transition-transform duration-300 ease-in-out flex gap-2  ${
+                            showFilters
+                                ? "translate-x-0"
+                                : "absolute left-0 -translate-x-full"
+                        }`}
                     >
-                        <RiFilterLine className=" mr-1" />
-                        Filter
-                    </Button>
-                )}
-                <span
-                    className={` transform transition-transform duration-300 ease-in-out flex gap-2  ${
-                        showFilters
-                            ? "translate-x-0"
-                            : "absolute left-0 -translate-x-full"
-                    }`}
-                >
-                    {filters}
-                </span>
-                {params?.filter(
-                    (p: { name: string }) =>
-                        p.name !== "page" && p.name !== "limit"
-                )?.length > 0 && (
-                    <Button
-                        size={"sm"}
-                        // variant={"outline"}
-                        // className="text-red-500"
-                        onClick={() => setParams && setParams([])}
-                    >
-                        <X size={20} className="mr-1" /> RESET
-                    </Button>
-                )}
+                        {filters}
+                    </span>
+                    {params?.filter(
+                        (p: { name: string }) =>
+                            p.name !== "page" && p.name !== "limit"
+                    )?.length > 0 && (
+                        <Button
+                            size={"sm"}
+                            onClick={() => setParams && setParams([])}
+                        >
+                            <X size={20} className="mr-1" /> RESET
+                        </Button>
+                    )}
+                </div>
+                {createButton}
             </div>
 
             {checkedRowsActionBtn && (
@@ -249,25 +305,37 @@ const DataTable = ({
 
             <div className="w-full overflow-x-auto my-3">
                 <div
-                    className={`${isDark ? 'ag-theme-balham-dark' : 'ag-theme-quartz'} ${styles.noBorders} min-w-[${minWidth}px] md:min-w-0`}
+                    className={`${
+                        isDark ? "ag-theme-balham-dark" : "ag-theme-quartz"
+                    } ${styles.custom} ${
+                        isMobile ? "w-full" : `min-w-[${minWidth}px]`
+                    } md:min-w-0`}
                 >
                     <AgGridReact
                         ref={gridRef}
                         rowData={processedRowData}
-                        columnDefs={processedColumnDefs}
+                        columnDefs={processedColumnDefs?.filter(Boolean)}
                         defaultColDef={defaultColDef}
+                        {...(selectable
+                            ? {
+                                  rowSelection: "multiple",
+                                  rowMultiSelectWithClick: true,
+                                  suppressRowClickSelection: false,
+                              }
+                            : {})}
                         domLayout="autoHeight"
                         loadingOverlayComponent={LoadingOverlayComponent}
                         noRowsOverlayComponent={noRowsOverlayComponent}
-                        rowSelection={"multiple"}
-                        suppressRowClickSelection={true}
                         onGridReady={onGridReady}
                         onSortChanged={onSortChanged}
+                        suppressHorizontalScroll={isMobile}
                         getRowClass={(params) => {
-                            return params.node?.rowIndex !== null &&
-                                params.node?.rowIndex % 2 === 0
-                                ? styles["even-row"]
-                                : styles["odd-row"];
+                            if (params.node?.rowIndex !== null) {
+                                return params.node.rowIndex % 2 === 0
+                                    ? "even-row"
+                                    : "odd-row";
+                            }
+                            return "";
                         }}
                     />
                 </div>
@@ -284,4 +352,4 @@ const DataTable = ({
     );
 };
 
-export default DataTable;
+export default memo(DataTable);

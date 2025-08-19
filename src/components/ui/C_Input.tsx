@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { forwardRef } from "react";
-import { Controller } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 export type CInputProps = {
     className?: string;
@@ -34,16 +34,19 @@ export const C_Input = forwardRef<HTMLInputElement, CInputProps>(
         },
         ref
     ) => {
+        const methods = useFormContext?.();
+        const contextControl = methods?.control ?? control;
+
         return (
             <div className="w-full">
                 <label htmlFor={id} className="block mb-1 text-sm font-medium text-foreground">
                     {label} {label_2}
                     {required && <span className="ml-1 text-destructive">*</span>}
                 </label>
-                {control ? (
+                {contextControl ? (
                     <Controller
                         name={id}
-                        control={control}
+                        control={contextControl}
                         rules={{
                             ...rules,
                             required: required ? `${label} is required` : undefined,

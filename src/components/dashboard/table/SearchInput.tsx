@@ -41,8 +41,9 @@ const SearchInput = ({
             <Input
                 value={searchValue}
                 onChange={handleOnChange}
-                className="pr-9"
+                className="pr-9 bg-background"
                 placeholder="Search"
+                
             />
             <button className="absolute border-l right-0 top-0">
                 <Search className="size-5 text-muted-foreground m-2.5" />

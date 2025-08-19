@@ -1,62 +1,101 @@
+/* Use AG Grid CSS variables to reliably theme dark mode */
+.custom:global(.ag-theme-balham-dark) {
+    /* Core colors */
+    --ag-background-color: hsl(var(--background));
+    --ag-foreground-color: hsl(var(--foreground));
+    --ag-header-background-color: hsl(var(--primary-deep));
+    --ag-odd-row-background-color: hsl(var(--background));
+    --ag-row-hover-color: hsl(var(--muted) / 0.15);
+    --ag-border-color: transparent;
+    
+    /* Sizing to avoid thinner rows */
+    --ag-row-height: 48px;
+    --ag-header-height: 48px;
+    --ag-list-item-height: 36px;
+    --ag-cell-horizontal-padding: 8px;
+}
+
+/* Correct dark-mode targeting with CSS Modules: local .custom + global theme on same element */
+.custom:global(.ag-theme-balham-dark) :global(.ag-row.even-row),
+.custom:global(.ag-theme-balham-dark) :global(.ag-row.odd-row) {
+    background-color: hsl(var(--background)) !important;
+}
+
+/* Alternate row background coloring for AG-Grid (MUI style) - light mode only */
+.custom :global(.ag-row.even-row) {
+    background-color: #f4f7fe !important;
+}
+.custom :global(.ag-row.odd-row) {
+    background-color: #fff !important;
+}
+
 /* Remove borders */
-.noBorders :global(.ag-root-wrapper),
-.noBorders :global(.ag-cell) {
+.custom :global(.ag-root-wrapper),
+.custom :global(.ag-cell) {
     border: none !important;
 }
 
-/* Custom header background color for light theme */
-.noBorders :global(.ag-theme-quartz .ag-header-row .ag-header-cell) {
-    background-color: hsl(var(--muted)) !important;
+/* Responsive table container */
+.custom {
+    width: 100%;
 }
 
-/* Custom header background color for dark theme */
-.noBorders :global(.ag-theme-balham-dark .ag-header-row .ag-header-cell) {
-    background-color: hsl(var(--muted)) !important;
-    color: hsl(var(--foreground)) !important;
+/* Scrollbar styling moved to global stylesheet (src/app/globals.css) */
+
+/* Mobile responsive adjustments */
+@media (max-width: 767px) {
+    .custom {
+        font-size: 0.875rem;
+    }
+
+    .custom :global(.ag-header-cell-text) {
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .custom :global(.ag-cell) {
+        padding: 12px 8px;
+        font-size: 0.875rem;
+        min-height: auto;
+    }
+
+    .custom :global(.ag-header-cell) {
+        padding: 12px 8px;
+    }
+
+    /* Make rows look more like cards on mobile */
+    .custom :global(.ag-row) {
+        border-bottom: 2px solid hsl(var(--border));
+        margin-bottom: 4px;
+    }
+
+    /* Add some breathing room between mobile rows */
+    .custom :global(.ag-center-cols-container) {
+        gap: 8px;
+    }
 }
 
-/* Vertically center all cell content for Quartz theme (light) */
-:global(.ag-theme-quartz .ag-cell) {
-    display: flex;
-    align-items: center;
-    padding-top: 0;
-    padding-bottom: 0;
-}
 
-/* Vertically center all cell content for Balham theme (dark) */
-:global(.ag-theme-balham-dark .ag-cell) {
-    display: flex;
-    align-items: center;
-    padding-top: 0;
-    padding-bottom: 0;
-    background-color: hsl(var(--background)) !important;
-    color: hsl(var(--foreground)) !important;
-}
 
 /* Vertically center inner content for light theme */
-:global(.ag-theme-quartz .ag-cell-wrapper) {
-    display: flex;
-    align-items: center;
-}
-
-/* Vertically center inner content for dark theme */
-:global(.ag-theme-balham-dark .ag-cell-wrapper) {
+:global(.ag-cell-wrapper) {
     display: flex;
     align-items: center;
 }
 
 /* Center SL header for light theme */
-:global(.ag-theme-quartz .ag-header-cell.sl-header .ag-header-cell-label) {
+:global(.ag-header-cell.sl-header .ag-header-cell-label) {
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
 }
 
-/* Center SL header for dark theme */
-:global(.ag-theme-balham-dark .ag-header-cell.sl-header .ag-header-cell-label) {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+
+
+
+/* Also hide the header cell's internal separator element if present */
+:global(.ag-header-cell.no-divider) :global(.ag-header-cell-resize) {
+    display: none !important;
 }
 
 /* Row striping for light theme */
@@ -68,15 +107,6 @@
     background-color: hsl(var(--background));
 }
 
-/* Dark theme specific overrides */
-:global(.ag-theme-balham-dark) .even-row {
-    background-color: hsl(var(--muted) / 0.2) !important;
-}
-
-:global(.ag-theme-balham-dark) .odd-row {
-    background-color: hsl(var(--background)) !important;
-}
-
 /* Dark theme grid background */
 :global(.ag-theme-balham-dark .ag-root-wrapper) {
     background-color: hsl(var(--background)) !important;
@@ -86,4 +116,14 @@
 :global(.ag-theme-balham-dark .ag-cell),
 :global(.ag-theme-balham-dark .ag-header-cell-text) {
     color: hsl(var(--foreground)) !important;
+}
+
+/* --- Dark mode colors without forcing height --- */
+.custom.ag-theme-balham-dark :global(.ag-row.even-row),
+.custom.ag-theme-balham-dark :global(.ag-row.odd-row) {
+    background-color: #23272f !important; /* AG Grid default dark row color, adjust as needed */
+}
+.custom.ag-theme-balham-dark :global(.ag-cell) {
+    padding: 0 8px !important;
+    color: #e2e8f0 !important; /* AG Grid default foreground, adjust as needed */
 }

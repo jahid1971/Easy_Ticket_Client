@@ -8,31 +8,49 @@ import { TRoute } from "@/types/Route";
 import { TQueryParam } from "@/types/general.types";
 import { defaultParams } from "@/constants/common";
 import { routeColumnDefs, IRouteRow } from "./ColumnDefs";
+import ConfirmDeleteModal from "@/components/modals/ConfirmDeleteModal";
 import DataTable from "@/components/dashboard/table/DataTable";
 import Link from "next/link";
+import { tryCatch } from "@/utils/tryCatch";
 
 const RoutesPage = () => {
     const [params, setParams] = useState<TQueryParam[]>(defaultParams);
     const [deleteIds, setDeleteIds] = useState<string[]>([]);
     const selectedRowsRef = useRef<IRouteRow[]>([]);
+    const [open, setOpen] = useState(false);
 
     const { data: routesData, isFetching } = useGetBusRoutes(params);
-    const deleteRouteMutation = useDeleteBusRoute();
+    const { mutate: deleteRoute, mutateAsync: deleteRouteAsync } = useDeleteBusRoute();
 
     const routes = useMemo(() => {
-        return routesData?.data?.map((route: TRoute) => ({
-            ...route,
-            routeData: route,
-        })) || [];
+        return (
+            routesData?.data?.map((route: TRoute) => ({
+                ...route,
+                routeData: route,
+            })) || []
+        );
     }, [routesData?.data]);
 
-    const handleDeleteRoute = useCallback((id: string) => {
-        if (confirm("Are you sure you want to delete this route?")) {
-            deleteRouteMutation.mutate(id);
-        }
-    }, [deleteRouteMutation]);
+    const handleDeleteRoute = async (id: string) => {
+        await tryCatch(
+            async () => await deleteRouteAsync(id),
+            "deleting route",
+            "Route deleted successfully"
+        );
 
-    const columnDefs = useMemo(() => routeColumnDefs(handleDeleteRoute), [handleDeleteRoute]);
+        setOpen(false);
+        setDeleteIds([]);
+    };
+
+
+    const handleModalOpen = (id: string) => {
+        setOpen(true);
+        setDeleteIds([id]);
+    };
+
+    const columnDefs = useMemo(() => {
+        return routeColumnDefs(handleModalOpen);
+    }, [handleModalOpen]);
 
     const handleSelectedRows = useCallback((rows: any) => {
         selectedRowsRef.current = rows;
@@ -62,7 +80,13 @@ const RoutesPage = () => {
     );
 
     return (
-        <div >
+        <div>
+            <ConfirmDeleteModal
+                title="Are you sure you want to delete this route?"
+                handleDelete={() => handleDeleteRoute(deleteIds[0])}
+                open={open}
+                onOpenChange={setOpen}
+            />
             <DataTable
                 title="ROUTES"
                 searchField

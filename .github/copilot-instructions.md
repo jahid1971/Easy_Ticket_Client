@@ -1,9 +1,9 @@
----
-trigger: always_on
-alwaysApply: true
----
+
 
 # GitHub Copilot Instructions (Client)
+
+
+- If you cange anywhere in my codebase then you must also refactor the files  dependendent on it. you are given full authority to change anywhere in my codebase except git merge.
 
 ## Context
 

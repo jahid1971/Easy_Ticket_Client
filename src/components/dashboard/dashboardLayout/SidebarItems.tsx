@@ -142,8 +142,8 @@ const SidebarItems = ({
     return (
         <>
             {navigationMenuItems.map((section: NavigationSection) => (
-                <SidebarGroup>
-                    <div key={section.label}>
+                <SidebarGroup  key={section.label}>
+                    <div>
                         {!isCollapsed && (
                             <SidebarGroupLabel>
                                 {" "}

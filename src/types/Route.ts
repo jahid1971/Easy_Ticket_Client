@@ -26,6 +26,11 @@ export interface RouteCreateInput {
     distance: number;
     description?: string;
     status?: RouteStatus;
+    routeStops?: {
+        busStopId: string;
+        order: number;
+        stopType: "BOARDING" | "DROPPING";
+    }[];
 }
 
 export interface RouteUpdateInput {
@@ -35,6 +40,11 @@ export interface RouteUpdateInput {
     distance?: number;
     description?: string;
     status?: RouteStatus;
+    routeStops?: {
+        busStopId: string;
+        order: number;
+        stopType: "BOARDING" | "DROPPING";
+    }[];
 }
 
 export interface RouteFormData {
@@ -44,6 +54,11 @@ export interface RouteFormData {
     distance: number;
     description?: string;
     status?: RouteStatus;
+    routeStops?: {
+        busStopId: string;
+        order: number;
+        stopType: "BOARDING" | "DROPPING";
+    }[];
 }
 
 export interface RouteSearchParams {

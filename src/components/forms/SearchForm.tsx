@@ -1,11 +1,12 @@
 "use client";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { DatePicker } from "@/components/ui/DatePicker";
-import { LocationCombobox } from "@/components/ui/LocationCombobox";
+
 import { useRouter } from "next/navigation";
 import { useGetBusRoute, useGetBusRoutes } from "@/Apis/busRouteApi";
 import { TRoute } from "@/types/Route";
 import { useMemo } from "react";
+import { C_Combobox } from "../ui/C_Combobox";
 
 
 export type SearchFormValues = {
@@ -55,22 +56,24 @@ export function SearchForm({
     return (
         <form id="hero-search-form" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <LocationCombobox
+                <C_Combobox
                     id="from"
                     label="Going From"
-                    placeholder="City or terminal"
                     options={sourceData}
                     control={control}
-                    required
+                    required={true}
+                    placeholder="City or terminal"
+                    className="w-full"
                     disabled={disabled}
                 />
-                <LocationCombobox
+                <C_Combobox
                     id="to"
                     label="Going To"
-                    placeholder="City or terminal"
                     options={[]}
                     control={control}
-                    required
+                    required={true}
+                    placeholder="City or terminal"
+                    className="w-full"
                     disabled={disabled}
                 />
                 <DatePicker

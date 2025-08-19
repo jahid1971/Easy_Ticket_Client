@@ -8,6 +8,7 @@ import { Plus, Minus, RotateCcw } from "lucide-react";
 import SeatMapPreviewModal from "../modals/SeatMapPreviewModal";
 // Accept flexible seatMap shape (spaceAfterColumn can be string in form state)
 import { cn } from "@/lib/utils";
+import { useFormContext } from "react-hook-form";
 
 interface SeatMapEditorProps {
     seatMap: { layout: string[][]; spaceAfterColumn?: string | number };
@@ -16,22 +17,23 @@ interface SeatMapEditorProps {
         spaceAfterColumn?: string | number;
     }) => void;
     error?: string;
-    control: any;
-    watch: any;
 }
 
-const SeatMapEditor = ({
-    seatMap,
-    onChange,
-    error,
-    control,
-    watch,
-}: SeatMapEditorProps) => {
+const SeatMapEditor = ({ seatMap, onChange, error }: SeatMapEditorProps) => {
+    const methods = useFormContext?.();
+    const control = methods?.control;
+    const watch = methods?.watch;
+    const setValue = methods?.setValue;
+
     const [rows, setRows] = useState(seatMap?.layout?.length || 10);
     const [cols, setCols] = useState(seatMap?.layout[0]?.length || 4);
     const spaceAfterColumn = String(
-        watch("seatMap.spaceAfterColumn") ?? seatMap?.spaceAfterColumn ?? "2"
+        (watch ? watch("seatMap.spaceAfterColumn") : undefined) ??
+            seatMap?.spaceAfterColumn ??
+            "2"
     );
+
+    // spaceAfterColumn derived from form watch or prop
 
     const [previewOpen, setPreviewOpen] = useState(false);
 
@@ -63,6 +65,9 @@ const SeatMapEditor = ({
 
     const generateSeatMap = () => {
         const newLayout = buildGeneratedLayout(rows, cols, seatMap?.layout);
+        if (setValue) {
+            setValue("seatMap", { layout: newLayout, spaceAfterColumn });
+        }
         onChange({ layout: newLayout, spaceAfterColumn });
     };
 
@@ -72,6 +77,8 @@ const SeatMapEditor = ({
         setRows(defaultRows);
         setCols(defaultCols);
         const freshLayout = buildGeneratedLayout(defaultRows, defaultCols);
+        if (setValue)
+            setValue("seatMap", { layout: freshLayout, spaceAfterColumn: "2" });
         onChange({ layout: freshLayout, spaceAfterColumn: "2" });
     };
 
@@ -100,6 +107,8 @@ const SeatMapEditor = ({
             return "";
         });
 
+        if (setValue)
+            setValue("seatMap", { layout: newLayout, spaceAfterColumn });
         onChange({ ...seatMap, layout: newLayout, spaceAfterColumn });
     };
 
@@ -184,13 +193,12 @@ const SeatMapEditor = ({
                         </label>
                         <CustomSelect
                             id="seatMap.spaceAfterColumn"
-                            size="xsm"
+                            size="sm"
                             options={[
                                 { value: "1", label: "1" },
                                 { value: "2", label: "2" },
                                 { value: "3", label: "3" },
                             ]}
-                            control={control}
                             placeholder="Select column"
                         />
                     </div>
@@ -201,7 +209,15 @@ const SeatMapEditor = ({
                             onOpenChange={setPreviewOpen}
                             seatMap={seatMap}
                             spaceAfterColumn={spaceAfterColumn}
-                            trigger={<Button type="button" variant="default" size="sm">Preview Seat Map</Button>}
+                            trigger={
+                                <Button
+                                    type="button"
+                                    variant="default"
+                                    size="sm"
+                                >
+                                    Preview Seat Map
+                                </Button>
+                            }
                         />
                         <Button
                             type="button"
@@ -216,23 +232,25 @@ const SeatMapEditor = ({
                 </div>
 
                 {/* Seat Map Preview */}
-                <div className="mb-2">
-                    <div className="text-xs font-mono text-muted-foreground bg-gray-50 p-2 rounded inline-block">
-                        <span className="font-semibold">#</span> click seats to toggle seat selection 
-                    </div>
-                </div>
+
                 {seatMap.layout.length > 0 && (
                     <div className="border rounded-lg p-4 bg-gray-50">
-                        <div className="text-sm font-medium mb-2">
+                        <div className="text-sm font-medium ">
                             Seat Layout Preview (
                             {seatMap.layout.reduce(
-                                (total, row) => total + row.length,
+                                (total, row) =>
+                                    total +
+                                    row.filter((s) => !!s && s !== "").length,
                                 0
                             )}{" "}
                             seats)
                         </div>
+                        <div className="text-xs  text-secondary font-mono  bg-gray-50  rounded inline-block mb-4">
+                            <span className="font-semibold">#</span> click seats
+                            to toggle seat selection
+                        </div>
                         <div className="space-y-2 max-h-[400px] overflow-y-auto">
-                                    {seatMap?.layout?.map((row, rowIndex) => (
+                            {seatMap?.layout?.map((row, rowIndex) => (
                                 <div
                                     key={rowIndex}
                                     className="flex justify-center gap-1"
@@ -244,14 +262,26 @@ const SeatMapEditor = ({
                                                 key={colIndex}
                                                 role="button"
                                                 aria-pressed={isActive}
-                                                title={isActive ? `Seat ${seat} (click to deselect)` : "Empty seat (click to add)"}
-                                                onClick={() => toggleSeat(rowIndex, colIndex)}
+                                                title={
+                                                    isActive
+                                                        ? `Seat ${seat} (click to deselect)`
+                                                        : "Empty seat (click to add)"
+                                                }
+                                                onClick={() =>
+                                                    toggleSeat(
+                                                        rowIndex,
+                                                        colIndex
+                                                    )
+                                                }
                                                 className={cn(
                                                     "w-8 h-8 rounded flex items-center justify-center text-xs font-mono cursor-pointer select-none transition-colors",
                                                     isActive
                                                         ? "bg-secondary text-white border border-amber-700"
                                                         : "bg-green-300 border border-green-300 opacity-30 hover:opacity-60",
-                                                    colIndex + 1 === Number(spaceAfterColumn) && "mr-7"
+                                                    colIndex + 1 ===
+                                                        Number(
+                                                            spaceAfterColumn
+                                                        ) && "mr-7"
                                                 )}
                                             >
                                                 {seat}

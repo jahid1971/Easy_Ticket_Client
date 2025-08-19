@@ -107,6 +107,11 @@ export const routeCreateSchema = z.object({
   distance: z.string().min(1, "Distance is required"), // 👈 keep as string (users type text)
   description: z.string().optional(),
   status: z.string().optional(), // 👈 user picks option, server validates enum
+  routeStops: z.array(z.object({
+    busStopId: z.string().min(1, "Bus stop is required"),
+    order: z.number().min(1, "Order must be at least 1"),
+    stopType: z.enum(["BOARDING", "DROPPING"]),
+  })).optional(),
 });
 
 // Seat map (client only ensures rows exist, not strict regex)

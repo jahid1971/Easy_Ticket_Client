@@ -8,40 +8,32 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
+    DialogTrigger,
 } from "@/components/ui/dialog";
 
 type ConfirmDeleteModalProps = {
+    title: string;
+    handleDelete: () => void | Promise<void>;
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    title?: string;
-    description?: string;
-    confirmLabel?: string;
-    loading?: boolean;
-    onConfirm: () => void | Promise<void>;
 };
 
-export default function ConfirmDeleteModal({
-    open,
-    onOpenChange,
-    title = "Delete item",
-    description = "This action cannot be undone. This will permanently delete the item.",
-    confirmLabel = "Delete",
-    loading = false,
-    onConfirm,
-}: ConfirmDeleteModalProps) {
+export default function ConfirmDeleteModal({ title, handleDelete, open, onOpenChange }: ConfirmDeleteModalProps) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>{description}</DialogDescription>
+                    <DialogDescription>
+                        This action cannot be undone. This will permanently delete the item.
+                    </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>
                         Cancel
                     </Button>
-                    <Button variant="destructive" onClick={() => onConfirm()} disabled={loading}>
-                        {loading ? "Deleting..." : confirmLabel}
+                    <Button variant="destructive" onClick={handleDelete}>
+                        Delete
                     </Button>
                 </DialogFooter>
             </DialogContent>

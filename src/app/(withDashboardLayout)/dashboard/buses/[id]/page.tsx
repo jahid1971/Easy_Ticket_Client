@@ -36,52 +36,49 @@ const BusDetailsPage = ({ params }: BusDetailsPageProps) => {
         );
     }
 
+    const router = useRouter();
+    const busId = params.id;
+    const { data: busData, isLoading } = useGetBus(busId);
+
+    if (isLoading) {
+        // Show skeleton loader while loading
+        return <Skeleton className="h-64 w-full" />;
+    }
+
+    if (!busData?.data) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-destructive">Bus not found</div>
+            </div>
+        );
+    }
+
     const bus = busData.data;
     const totalSeats = bus.seatMap?.layout?.reduce((total, row) => total + row.length, 0) || 0;
 
     return (
-        <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="sm" asChild>
-                    <Link href="/dashboard/buses">
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to Buses
-                    </Link>
-                </Button>
-                <div className="flex items-center gap-3 flex-1">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                        <Bus className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                        <h2 className="text-3xl font-bold tracking-tight">{bus.name}</h2>
-                        <p className="text-muted-foreground">
-                            Bus Details and Information
-                        </p>
-                    </div>
-                    <Button asChild>
-                        <Link href={`/dashboard/buses/${busId}/edit`}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Bus
+        <React.Suspense fallback={<Skeleton className="h-64 w-full" />}>
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center gap-4">
+                    <Button variant="ghost" size="sm" asChild>
+                        <Link href="/dashboard/buses">
+                            <ArrowLeft className="h-4 w-4" />
+                            Back to Buses
                         </Link>
                     </Button>
+                    <div className="flex items-center gap-3 flex-1">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                            <Bus className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                            <h2 className="text-3xl font-bold tracking-tight">{bus.name}</h2>
+                            <p className="text-muted-foreground">
+                                Bus Details and Information
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            {/* Content */}
-            <div className="grid gap-6 lg:grid-cols-3">
-                {/* Main Information */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Basic Information */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Bus className="h-5 w-5" />
-                                Basic Information
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid gap-4 md:grid-cols-2">
                                 <div>
                                     <label className="text-sm font-medium text-muted-foreground">Bus Name</label>
                                     <p className="text-lg font-semibold">{bus.name}</p>

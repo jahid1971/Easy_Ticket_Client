@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TApiResponse, TQueryParam } from "@/types/general.types";
 import apiClient from "./apiClient";
 import {
@@ -9,6 +10,7 @@ import {
     QueryClient,
 } from "@tanstack/react-query";
 import { useDebouncedValue } from "./clientHooks";
+import React from "react";
 
 export type BuildPath<TId = string> = (
     base: string,
@@ -81,6 +83,18 @@ export function createResourceApi<
     };
 
     const createOne = async (payload: TCreate): Promise<T> => {
+        // Support sending FormData (for file uploads). axios will set the
+        // correct multipart boundary header when Content-Type is set to
+        // multipart/form-data here (overriding the json default).
+        // We detect FormData at runtime to avoid changing the function signature.
+        if (typeof FormData !== "undefined" && payload instanceof FormData) {
+            const res = await apiClient.post<TApiResponse<T>>(url, payload, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+
+            return res as unknown as T;
+        }
+
         const res = await apiClient.post<TApiResponse<T>>(url, payload);
         return res as unknown as T;
     };
@@ -103,19 +117,38 @@ export function createResourceApi<
         params?: Record<string, unknown> | TQueryParam[],
         options?: UseQueryOptions<TApiResponse<T[]>, Error, TResult>
     ) => {
-        const normalized = Array.isArray(params)
-            ? convertParamsToObject(params)
-            : params;
+        // IMPORTANT: memoize normalization so the reference stays stable across renders
+        const normalized = React.useMemo(() => {
+            return Array.isArray(params)
+                ? convertParamsToObject(params)
+                : params;
+        }, [params]);
 
-        // Auto-detect if searchTerm is present and apply default debounce (300ms)
-        const hasSearchTerm = normalized && 'searchTerm' in normalized && normalized.searchTerm;
-        const autoDebounceMs = hasSearchTerm ? 300 : 0;
-        const debounced = useDebouncedValue(normalized, autoDebounceMs);
-        const effectiveParams = autoDebounceMs > 0 ? debounced : normalized;
+        // Extract only the primitive searchTerm and debounce that primitive.
+        // Debouncing the whole `normalized` object can cause reference churn when
+        // parent components recreate objects on each render.
+        const searchTerm = React.useMemo(() => {
+            if (!normalized) return undefined;
+            const v = (normalized as Record<string, unknown>)["searchTerm"];
+            return typeof v === "string" ? v : undefined;
+        }, [normalized]);
+
+        const debouncedSearch = useDebouncedValue(searchTerm, searchTerm ? 300 : 0);
+
+        // Build effectiveParams by merging debounced searchTerm into normalized.
+        // This produces a stable object reference when nothing changes.
+        const effectiveParams = React.useMemo(() => {
+            if (!normalized) return normalized;
+            if (debouncedSearch === undefined) return normalized;
+            return { ...(normalized as Record<string, unknown>), searchTerm: debouncedSearch };
+        }, [normalized, debouncedSearch]);
+
+    const queryKey = React.useMemo(() => makeQueryKey(key, effectiveParams), [effectiveParams]);
+        const queryFn = React.useCallback(() => getAll(effectiveParams), [effectiveParams]);
 
         return useQuery({
-            queryKey: makeQueryKey(key, effectiveParams), // ex: ["students", {category:"boys"}]
-            queryFn: () => getAll(effectiveParams),
+            queryKey,
+            queryFn,
             staleTime: defaultStaleTime,
             retry: defaultRetry,
             ...(options ?? {}),
@@ -129,8 +162,8 @@ export function createResourceApi<
         options?: UseQueryOptions<TApiResponse<T>, Error, TResult>
     ) => {
         return useQuery({
-            queryKey: makeQueryKey(key, id),
-            queryFn: () => getById(id),
+            queryKey: React.useMemo(() => makeQueryKey(key, id), [id]),
+            queryFn: React.useCallback(() => getById(id), [id]),
             enabled: !!id,
             staleTime: defaultStaleTime,
             retry: defaultRetry,
@@ -205,14 +238,14 @@ export function createResourceApi<
     };
 
     const useDeleteMutation = (
-        options?: UseMutationOptions<unknown, Error, TId, unknown> & {
+        options?: UseMutationOptions<any, Error, TId, unknown> & {
             invalidateKeys?: string[];
         }
     ) => {
         const qc = useQueryClient();
         const { invalidateKeys, ...mutationOptions } = options ?? {};
         
-        return useMutation<unknown, Error, TId, unknown>({
+        return useMutation<any, Error, TId, unknown>({
             mutationFn: (id: TId) => deleteOne(id),
             onSuccess: (data, variables, context) => {
                 // Invalidate the main resource key
